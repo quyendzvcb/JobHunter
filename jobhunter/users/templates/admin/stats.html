@@ -1,0 +1,26 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div style="padding: 20px;">
+    <h1>Thống kê hệ thống</h1>
+    <br>
+    <table style="width: 50%; border-collapse: collapse; border: 1px solid #ccc;">
+        <thead style="background-color: #f8f8f8;">
+            <tr>
+                <th style="padding: 10px; border: 1px solid #ccc; text-align: left;">Loại tài khoản</th>
+                <th style="padding: 10px; border: 1px solid #ccc; text-align: center;">Số lượng</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in stats %}
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ccc;">{{ item.name }}</td>
+                <td style="padding: 10px; border: 1px solid #ccc; text-align: center; font-weight: bold; color: #c00;">
+                    {{ item.count }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

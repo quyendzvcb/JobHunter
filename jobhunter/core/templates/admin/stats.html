@@ -1,0 +1,70 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block content %}
+<style>
+    .kpi-container { display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap; }
+    .kpi-card { flex: 1; min-width: 200px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 4px solid #417690; }
+    .kpi-title { font-size: 14px; color: #666; text-transform: uppercase; margin-bottom: 10px; }
+    .kpi-value { font-size: 28px; font-weight: bold; color: #333; }
+    .alert { border-top-color: #dc3545; }
+    .success { border-top-color: #28a745; }
+
+    .stats-table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+    .stats-table th, .stats-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+    .stats-table th { background-color: #f8f9fa; font-weight: 600; }
+</style>
+
+<div style="padding: 20px;">
+    <h1>DASHBOARD THỐNG KÊ HỆ THỐNG</h1>
+
+    <div class="kpi-container">
+        <div class="kpi-card success">
+            <div class="kpi-title">Tổng Doanh Thu</div>
+            <div class="kpi-value">{{ kpi.revenue|floatformat:0 }} ₫</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Tổng Việc Làm</div>
+            <div class="kpi-value">{{ kpi.jobs }}</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Nhà Tuyển Dụng</div>
+            <div class="kpi-value">{{ kpi.recruiters }}</div>
+        </div>
+        <div class="kpi-card alert">
+            <div class="kpi-title">NTD Chờ Duyệt</div>
+            <div class="kpi-value">{{ kpi.pending }}</div>
+            <a href="/admin/users/recruiter/?is_verified__exact=0" style="font-size: 12px; color: #dc3545; text-decoration: none; display: block; margin-top: 5px;">Xem danh sách &rarr;</a>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Hồ Sơ Ứng Tuyển</div>
+            <div class="kpi-value">{{ kpi.apps }}</div>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 300px;">
+            <h3>Top Ngành Nghề Tuyển Dụng</h3>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Ngành nghề</th>
+                        <th>Số lượng Tin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cate in cate_stats %}
+                    <tr>
+                        <td>{{ cate.name }}</td>
+                        <td><strong>{{ cate.job_count }}</strong></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2">Chưa có dữ liệu</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        </div>
+</div>
+{% endblock %}
