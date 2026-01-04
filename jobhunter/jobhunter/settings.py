@@ -60,7 +60,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ),
-    'DATETIME_FORMAT': "%d-%m-%Y %H:%M:%S"
+    'DATETIME_FORMAT': "%d-%m-%Y %H:%M:%S",
+}
+
+OAUTH2_PROVIDER = {
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 2592000,
 }
 
 MIDDLEWARE = [

@@ -24,7 +24,7 @@ class RecruiterAdmin(admin.ModelAdmin):
         return obj.user.date_joined
 
 class ApplicantAdmin(admin.ModelAdmin):
-    list_display = ['full_name','email', 'gender', 'dob', 'is_premium', 'user_email']
+    list_display = ['full_name', 'user_email', 'gender', 'dob', 'is_premium', ]
     list_filter = ['is_premium', 'gender']
     readonly_fields = ['user']
     search_fields = ['user__first_name', 'user__last_name', 'user__email']
