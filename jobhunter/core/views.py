@@ -22,6 +22,9 @@ class RecruiterJobViewSet(viewsets.ModelViewSet):
         return serializers.JobSerializer
 
     def get_queryset(self):
+        user = self.request.user
+        if getattr(self, 'swagger_fake_view', False) or not perms.IsVerifiedRecruiter:
+            return Job.objects.none()
         return Job.objects.filter(recruiter__user=self.request.user)
 
     def perform_create(self, serializer):
@@ -118,6 +121,8 @@ class ApplicationViewSet(viewsets.ViewSet, generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        if getattr(self, 'swagger_fake_view', False) or not user.is_authenticated:
+            return Job.objects.none()
         if user.role == User.Role.RECRUITER:
             return Application.objects.filter(job__recruiter__user=user).select_related('job', 'applicant__user')
         elif user.role == User.Role.APPLICANT:
@@ -149,6 +154,9 @@ class ServicePackageViewSet(viewsets.ReadOnlyModelViewSet):
         return serializers.ServicePackageSerializer
 
     def get_queryset(self):
+        user = self.request.user
+        if getattr(self, 'swagger_fake_view', False) or not user.is_authenticated:
+            return Job.objects.none()
         return ServicePackage.objects.filter(
             is_active=True,
             target_user=self.request.user.role
