@@ -23,7 +23,7 @@ class RecruiterJobViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if getattr(self, 'swagger_fake_view', False) or not perms.IsVerifiedRecruiter:
+        if getattr(self, 'swagger_fake_view', False) or not user.is_authenticated:
             return Job.objects.none()
         return Job.objects.filter(recruiter__user=self.request.user)
 
@@ -146,7 +146,7 @@ class ApplicationViewSet(viewsets.ViewSet, generics.ListAPIView):
 
 
 class ServicePackageViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_serializer_class(self):
         if self.action == 'list':
