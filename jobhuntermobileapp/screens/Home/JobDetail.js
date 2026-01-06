@@ -2,9 +2,9 @@ import React, { useContext, useEffect, useState } from "react";
 import { View, ScrollView, useWindowDimensions, Image, Alert } from "react-native";
 import { Text, Button } from "react-native-paper";
 import RenderHtml from 'react-native-render-html';
-import Apis, { authApis, endpoints } from "../utils/Apis";
-import { MyUserContext } from "../utils/MyContext";
-import MyStyles from "../styles/MyStyles";
+import Apis, { authApis, endpoints } from "../../utils/Apis";
+import { MyUserContext } from "../../utils/contexts/MyUserContext";
+import MyStyles from "../../styles/MyStyles";
 
 const JobDetail = ({ route }) => {
     const { jobId } = route.params;
@@ -27,7 +27,7 @@ const JobDetail = ({ route }) => {
         try {
             let form = new FormData();
             form.append("job", jobId);
-            await authApis(user.token).post(endpoints['apply-job'], form, { headers: { 'Content-Type': 'multipart/form-data' }});
+            await authApis(user.token).post(endpoints['apply-job'], form, { headers: { 'Content-Type': 'multipart/form-data' } });
             Alert.alert("Thành công", "Đã ứng tuyển!");
         } catch (e) { Alert.alert("Lỗi", "Đã có lỗi xảy ra hoặc bạn đã ứng tuyển rồi."); }
     }
@@ -35,7 +35,7 @@ const JobDetail = ({ route }) => {
     if (!job) return <Text>Đang tải...</Text>;
 
     return (
-        <ScrollView style={[MyStyles.container, {backgroundColor: 'white'}]}>
+        <ScrollView style={[MyStyles.container, { backgroundColor: 'white' }]}>
             <View style={{ padding: 20, alignItems: 'center', backgroundColor: '#fff5f5' }}>
                 <Image source={{ uri: job.recruiter.logo }} style={{ width: 80, height: 80 }} resizeMode="contain" />
                 <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 10 }}>{job.title}</Text>
@@ -48,7 +48,7 @@ const JobDetail = ({ route }) => {
             <View style={{ padding: 20 }}>
                 <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Mô tả công việc</Text>
                 <RenderHtml contentWidth={width} source={{ html: job.description }} />
-                
+
                 <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 15 }}>Yêu cầu</Text>
                 <RenderHtml contentWidth={width} source={{ html: job.requirements }} />
 
@@ -59,4 +59,4 @@ const JobDetail = ({ route }) => {
         </ScrollView>
     );
 }
-export default JobDetails;
+export default JobDetail;

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { View, FlatList, Image, RefreshControl, Alert } from "react-native";
 import { Text, Card, Chip, ActivityIndicator, Avatar, Button } from "react-native-paper";
-import { MyUserContext } from "../../utils/MyContext";
+import { MyUserContext } from "../../utils/contexts/MyUserContext";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import Apis, { authApis, endpoints } from "../../utils/Apis";
 import MyStyles from "../../styles/MyStyles";
@@ -18,7 +18,7 @@ const Activity = () => {
     // Hàm load dữ liệu tùy theo vai trò
     const loadData = async () => {
         if (!user) return; // Chưa login thì không load
-        
+
         setLoading(true);
         try {
             // Backend Django đã tự lọc:
@@ -34,7 +34,12 @@ const Activity = () => {
     }
 
     useEffect(() => {
-        if (isFocused) loadData();
+        // Chỉ load dữ liệu khi màn hình được focus VÀ người dùng đã đăng nhập thành công
+        if (isFocused && user && user.token) {
+            loadApplications();
+        } else if (isFocused && !user) {
+            setData([]); // Xóa dữ liệu cũ nếu đăng xuất
+        }
     }, [isFocused, user]);
 
     // Giao diện khi CHƯA ĐĂNG NHẬP
@@ -58,23 +63,23 @@ const Activity = () => {
             <Card.Content>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                     {/* Avatar Ứng viên */}
-                    <Avatar.Image 
-                        size={50} 
-                        source={{ uri: item.applicant?.user?.avatar || 'https://via.placeholder.com/150' }} 
+                    <Avatar.Image
+                        size={50}
+                        source={{ uri: item.applicant?.user?.avatar || 'https://via.placeholder.com/150' }}
                     />
                     <View style={{ marginLeft: 15, flex: 1 }}>
                         <Text variant="titleMedium" style={{ fontWeight: 'bold' }}>
                             {item.applicant?.user?.last_name} {item.applicant?.user?.first_name}
                         </Text>
                         <Text variant="bodySmall" style={{ color: 'gray' }}>
-                            Ứng tuyển: <Text style={{fontWeight: 'bold', color: '#333'}}>{item.job?.title}</Text>
+                            Ứng tuyển: <Text style={{ fontWeight: 'bold', color: '#333' }}>{item.job?.title}</Text>
                         </Text>
                     </View>
                 </View>
 
                 <View style={{ backgroundColor: '#f9f9f9', padding: 10, borderRadius: 5 }}>
                     <Text variant="bodySmall" numberOfLines={2}>
-                        <Text style={{fontWeight: 'bold'}}>Cover Letter: </Text> 
+                        <Text style={{ fontWeight: 'bold' }}>Cover Letter: </Text>
                         {item.cover_letter || "Không có thư giới thiệu"}
                     </Text>
                 </View>
@@ -84,7 +89,7 @@ const Activity = () => {
                         {moment(item.created_at).fromNow()}
                     </Chip>
                     {/* Status Badge */}
-                    <Chip 
+                    <Chip
                         style={{ backgroundColor: item.status === 'PENDING' ? '#fff3e0' : '#e8f5e9' }}
                         textStyle={{ color: item.status === 'PENDING' ? 'orange' : 'green' }}
                     >
@@ -105,10 +110,10 @@ const Activity = () => {
         <Card style={MyStyles.card}>
             <Card.Content>
                 <View style={{ flexDirection: 'row' }}>
-                    <Image 
-                        source={{ uri: item.job?.recruiter?.logo || 'https://via.placeholder.com/60' }} 
-                        style={{ width: 50, height: 50, borderRadius: 5, marginRight: 15 }} 
-                        resizeMode="contain" 
+                    <Image
+                        source={{ uri: item.job?.recruiter?.logo || 'https://via.placeholder.com/60' }}
+                        style={{ width: 50, height: 50, borderRadius: 5, marginRight: 15 }}
+                        resizeMode="contain"
                     />
                     <View style={{ flex: 1 }}>
                         <Text variant="titleMedium" style={{ fontWeight: 'bold' }}>{item.job?.title}</Text>

@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { View, ScrollView, Alert, Image } from "react-native";
 import { Avatar, Text, Button, Chip, List, Divider } from "react-native-paper";
-import { MyUserContext } from "../../utils/MyContext";
+import { MyUserContext } from "../../utils/contexts/MyUserContext";
 import { useNavigation } from "@react-navigation/native";
 import MyStyles from "../../styles/MyStyles";
 

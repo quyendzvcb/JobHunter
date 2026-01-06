@@ -3,7 +3,7 @@ import { View, Alert } from "react-native";
 import { Button, TextInput, Text } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import Apis, { authApis, endpoints } from "../../utils/Apis";
-import { MyUserContext } from "../../utils/MyContext";
+import { MyUserContext } from "../../utils/contexts/MyUserContext";
 import MyStyles from "../../styles/MyStyles";
 
 const Login = () => {

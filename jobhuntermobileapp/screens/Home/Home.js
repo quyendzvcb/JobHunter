@@ -38,7 +38,7 @@ const Home = () => {
     useEffect(() => { loadJobs(); }, [q, cateId]);
 
     const renderJob = ({ item }) => (
-        <TouchableOpacity onPress={() => nav.navigate("JobDetails", { jobId: item.id })}>
+        <TouchableOpacity onPress={() => nav.navigate("JobDetail", { jobId: item.id })}>
             <Card style={MyStyles.card}>
                 <Card.Content style={{ flexDirection: 'row' }}>
                     <Image source={{ uri: item.recruiter.logo || 'https://via.placeholder.com/60' }} style={{ width: 60, height: 60, borderRadius: 5, marginRight: 15 }} resizeMode="contain" />
@@ -59,13 +59,13 @@ const Home = () => {
         <View style={MyStyles.container}>
             <View style={{ backgroundColor: '#d32f2f', padding: 20, paddingBottom: 10 }}>
                 <Searchbar placeholder="Tìm việc, công ty..." value={q} onChangeText={setQ} style={{ borderRadius: 10, backgroundColor: 'white' }} />
-                <FlatList 
+                <FlatList
                     horizontal data={categories} showsHorizontalScrollIndicator={false}
                     keyExtractor={i => i.id.toString()}
                     style={{ marginTop: 10 }}
                     renderItem={({ item }) => (
-                        <Chip 
-                            selected={cateId === item.id} 
+                        <Chip
+                            selected={cateId === item.id}
                             onPress={() => setCateId(cateId === item.id ? null : item.id)}
                             style={{ marginRight: 8, backgroundColor: cateId === item.id ? '#ffcdd2' : 'white' }}
                         >{item.name}</Chip>
@@ -74,9 +74,9 @@ const Home = () => {
             </View>
             <View style={{ flex: 1, padding: 10 }}>
                 {loading ? <ActivityIndicator color="#d32f2f" /> : (
-                    <FlatList 
-                        data={jobs} 
-                        renderItem={renderJob} 
+                    <FlatList
+                        data={jobs}
+                        renderItem={renderJob}
                         keyExtractor={i => i.id.toString()}
                         refreshControl={<RefreshControl refreshing={loading} onRefresh={loadJobs} />}
                     />

@@ -5,8 +5,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Provider as PaperProvider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import { MyUserContext } from "./utils/MyContext";
-import MyUserReducer from "./reducers/MyUserReducer";
+import { MyUserContext } from "./utils/contexts/MyUserContext";
+import MyUserReducer from "./utils/reducers/MyUserReducer";
 
 import Welcome from "./screens/Welcome";
 import Home from "./screens/Home/Home";
@@ -14,7 +14,7 @@ import Activity from "./screens/Home/Activity"; // Import file mới
 import Profile from "./screens/User/Profile";
 import Login from "./screens/User/Login";
 import Register from "./screens/User/Register";
-import JobDetails from "./screens/JobDetails";
+import JobDetails from "./screens/Home/JobDetail";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
