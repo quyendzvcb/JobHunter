@@ -10,7 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // THÔNG TIN OAUTH2 (Thay bằng thông tin thực tế của bạn)
 const CLIENT_ID = "qCIXUuHLngrsgjhSayw5Ah0fuBUbtaIfDFGozTJW";
-const CLIENT_SECRET = "DÙNG_CLIENT_SECRET_CỦA_BẠN";
+const CLIENT_SECRET = "CeoKoM5FzZCRUXvRgv2DkgNG7r8faBxsoZM7XwErMvvYhfgVLoReRzmjVRfEyHDyeIHBMPDX2ldWTW0LYHXNYY8i7gSKfdynOgb4oMm7ZtrEILrVkKGeZ6CILsxKVM5O";
 
 // --- COMPONENT INPUT (Đưa ra ngoài để tránh lag - Giống Register) ---
 const RenderInput = ({ label, value, onChange, icon, secure = false, rightIcon = null, style = {} }) => (
@@ -47,11 +47,15 @@ const Login = () => {
     const [user, setUser] = useState({ username: "", password: "" });
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [dispatch] = useContext(MyUserContext);
+    const [, dispatch] = useContext(MyUserContext);
 
     const updateState = (field, value) => {
         setUser(current => ({ ...current, [field]: value }));
     };
+
+    const validate = () => {
+
+    }
 
     const login = async () => {
         if (!user.username || !user.password) {
@@ -59,13 +63,13 @@ const Login = () => {
             return;
         }
 
-        setLoading(true);
+
         try {
+            setLoading(true);
             // 1. Gọi API lấy Token OAuth2
             const res = await Apis.post(endpoints['login'], {
+                ...user,
                 'grant_type': 'password',
-                'username': user.username,
-                'password': user.password,
                 'client_id': CLIENT_ID,
                 'client_secret': CLIENT_SECRET
             }, {
@@ -75,14 +79,16 @@ const Login = () => {
             // 2. Lưu token
             await AsyncStorage.setItem("token", res.data.access_token);
 
-            // 3. Lấy thông tin User hiện tại
-            const userRes = await authApis(res.data.access_token).get(endpoints['current-user']);
-
-            // 4. Cập nhật Context
-            dispatch({ type: "login", payload: userRes.data });
-
-            // 5. Chuyển trang
-            nav.replace("MainApp");
+            setTimeout(async () => {
+                const userRes = await authApis(res.data.access_token).get(endpoints['current-user']);
+                dispatch({
+                    "type": "login",
+                    "payload": userRes.data
+                });
+                const next = route.params?.next;
+                if (next)
+                    nav.navigate(next);
+            }, 500);
 
         } catch (ex) {
             console.error(ex);

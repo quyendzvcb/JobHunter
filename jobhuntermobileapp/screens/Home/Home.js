@@ -41,10 +41,10 @@ const Home = () => {
         <TouchableOpacity onPress={() => nav.navigate("JobDetail", { jobId: item.id })}>
             <Card style={MyStyles.card}>
                 <Card.Content style={{ flexDirection: 'row' }}>
-                    <Image source={{ uri: item.recruiter.logo || 'https://via.placeholder.com/60' }} style={{ width: 60, height: 60, borderRadius: 5, marginRight: 15 }} resizeMode="contain" />
+                    <Image source={{ uri: item.recruiter?.logo || 'https://via.placeholder.com/60' }} style={{ width: 60, height: 60, borderRadius: 5, marginRight: 15 }} resizeMode="contain" />
                     <View style={{ flex: 1 }}>
                         <Text variant="titleMedium" style={{ fontWeight: 'bold' }} numberOfLines={2}>{item.title}</Text>
-                        <Text variant="bodySmall" style={{ color: 'gray' }}>{item.recruiter.company_name}</Text>
+                        <Text variant="bodySmall" style={{ color: 'gray' }}>{item.recruiter?.company_name}</Text>
                         <View style={[MyStyles.row, { justifyContent: 'space-between', marginTop: 5 }]}>
                             <Text style={{ color: '#d32f2f', fontWeight: 'bold' }}>{item.salary_min ? `$${item.salary_min}` : 'Thỏa thuận'}</Text>
                             <Text style={{ fontSize: 10, color: 'gray' }}>{moment(item.created_at).fromNow()}</Text>

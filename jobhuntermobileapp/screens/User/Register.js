@@ -7,7 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import RegisterStyle from "./RegisterStyle";
 import Apis, { endpoints } from "../../utils/Apis";
 
-// --- 1. COMPONENT INPUT (Đã cập nhật để hiện lỗi đỏ) ---
+// --- COMPONENT INPUT ---
 const RenderInput = ({ label, value, onChange, icon, secure = false, rightIcon = null, keyboardType = 'default', style = {}, errorText = null }) => (
     <View style={[RegisterStyle.inputWrapper, style]}>
         <TextInput
@@ -35,12 +35,10 @@ const Register = () => {
     const nav = useNavigation();
     const [loading, setLoading] = useState(false);
     const [role, setRole] = useState("APPLICANT");
-    const [avatar, setAvatar] = useState(null);
     const [showPass, setShowPass] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
-    const [showDatePicker, setShowDatePicker] = useState(false);
 
-    // State lưu lỗi từ Server
+    // --- KHÔI PHỤC STATE LƯU LỖI CHI TIẾT ---
     const [errors, setErrors] = useState({});
 
     const [user, setUser] = useState({
@@ -50,133 +48,110 @@ const Register = () => {
     });
 
     const updateState = (field, value) => {
-        setUser(c => ({ ...c, [field]: value }));
+        setUser(current => ({ ...current, [field]: value }));
+        // Xóa lỗi khi người dùng bắt đầu nhập lại
         if (errors[field]) {
             setErrors(e => ({ ...e, [field]: null }));
         }
     };
 
-    const onDateChange = (event, selectedDate) => {
-        setShowDatePicker(false);
-        if (selectedDate) {
-            const year = selectedDate.getFullYear();
-            const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-            const day = String(selectedDate.getDate()).padStart(2, '0');
-            updateState('dob', `${year}-${month}-${day}`);
-        }
-    };
-
     const pickImage = async () => {
         let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') return Alert.alert("Lỗi", "Cần cấp quyền truy cập ảnh!");
+        if (status !== 'granted') {
+            Alert.alert("Lỗi", "Cần cấp quyền truy cập ảnh!");
+        } else {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                quality: 1,
+            });
+            if (!result.canceled) {
+                // Lưu vào user.avatar thay vì state riêng
+                updateState("avatar", result.assets[0]);
+            }
+        }
+    }
 
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            quality: 0.7,
-        });
-        if (!result.canceled) setAvatar(result.assets[0]);
-    };
+    const validate = () => {
+        let isValid = true;
+        let newErrors = {};
+
+        if (!user.password || user.password !== user.confirm) {
+            newErrors.confirm = "Mật khẩu xác nhận không khớp!";
+            isValid = false;
+        }
+
+        // Cập nhật lỗi để hiển thị đỏ
+        setErrors(newErrors);
+        return isValid;
+    }
 
     const register = async () => {
-        setErrors({}); // Reset lỗi
+        if (validate()) {
+            setLoading(true);
+            try {
+                let form = new FormData();
 
-        if (user.password !== user.confirm) {
-            setErrors({ confirm: "Mật khẩu xác nhận không khớp!" });
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            let form = new FormData();
-
-            // Append dữ liệu chung
-            ['first_name', 'last_name', 'email', 'username', 'password'].forEach(k => {
-                form.append(k, user[k]);
-            });
-
-            // Append Avatar (Chú ý: name và type rất quan trọng)
-            if (avatar) {
-                form.append(role === 'RECRUITER' ? 'logo' : 'avatar', {
-                    uri: avatar.uri,
-                    name: avatar.fileName || 'image.jpg',
-                    type: 'image/jpeg'
+                // 1. Append các trường cơ bản
+                const commonFields = ['first_name', 'last_name', 'username', 'password', 'email'];
+                commonFields.forEach(field => {
+                    if (user[field]) form.append(field, user[field]);
                 });
-            }
 
-            // Append dữ liệu theo Role
-            let url = "";
-            if (role === 'APPLICANT') {
-                url = endpoints['register-aplicant'];
-                form.append('phone_number', user.phone_number);
-                form.append('address', user.address);
-                form.append('gender', user.gender);
-                if (user.dob) form.append('dob', user.dob);
-            } else {
-                url = endpoints['register-recruiter'];
-                ['company_name', 'company_location', 'webURL'].forEach(k => form.append(k, user[k]));
-            }
-
-            console.log("Đang gửi đăng ký đến:", url);
-
-            // --- GỌI API (ĐÃ FIX LỖI CONTENT-TYPE) ---
-            // Không set 'Content-Type': 'multipart/form-data' thủ công
-            const res = await Apis.post(url, form, {
-                headers: {
-                    // Để trống Content-Type để Axios tự động thêm boundary
-                    "Accept": "application/json",
-                },
-                transformRequest: (data, headers) => {
-                    return data; // Ngăn Axios serialize FormData
-                },
-            });
-
-            if (res.status === 201) {
-                Alert.alert("Thành công", "Đăng ký thành công! Vui lòng đăng nhập.");
-                nav.replace("Login");
-            }
-
-        } catch (ex) {
-            // --- LOG LỖI CHI TIẾT ---
-            console.log("========== LỖI ĐĂNG KÝ ==========");
-            if (ex.response) {
-                // Server trả về response lỗi (4xx, 5xx)
-                console.log("Status:", ex.response.status);
-                console.log("Data:", JSON.stringify(ex.response.data, null, 2));
-
-                // Xử lý hiển thị lỗi lên màn hình
-                const serverErrors = ex.response.data;
-                let formattedErrors = {};
-                for (let key in serverErrors) {
-                    let errorMessage = serverErrors[key];
-                    if (Array.isArray(errorMessage)) errorMessage = errorMessage[0];
-                    formattedErrors[key] = errorMessage;
+                // 2. Xử lý ảnh (Dùng user.avatar)
+                if (user.avatar) {
+                    const imageKey = role === 'RECRUITER' ? 'logo' : 'avatar';
+                    form.append(imageKey, {
+                        uri: user.avatar.uri,
+                        name: user.avatar.fileName || 'image.jpg',
+                        type: 'image/jpeg'
+                    });
                 }
-
-                setErrors(formattedErrors);
-
-                if (formattedErrors.non_field_errors) {
-                    Alert.alert("Lỗi", formattedErrors.non_field_errors);
-                } else if (Object.keys(formattedErrors).length > 0) {
-                    Alert.alert("Lỗi nhập liệu", "Vui lòng kiểm tra các ô báo đỏ.");
+                // 3. Chọn URL và append trường riêng biệt
+                let url = "";
+                if (role === "APPLICANT") {
+                    url = endpoints['register-applicant'];
+                    form.append('gender', user.gender);
+                    form.append('address', user.address);
+                    form.append('phone_number', user.phone_number);
+                    if (user.dob) form.append('dob', user.dob);
                 } else {
-                    Alert.alert("Lỗi Server", "Có lỗi xảy ra phía server.");
+                    url = endpoints['register-recruiter'];
+                    form.append('company_name', user.company_name);
+                    form.append('company_location', user.company_location);
+                    form.append('webURL', user.webURL);
                 }
 
-            } else if (ex.request) {
-                // Không nhận được phản hồi (Lỗi mạng)
-                console.log("Network Error:", ex.message);
-                Alert.alert("Lỗi kết nối", "Kiểm tra internet hoặc server có đang chạy không?");
-            } else {
-                // Lỗi code
-                console.log("Error Message:", ex.message);
-            }
-            console.log("=================================");
+                console.info("Registering to URL:", url);
 
-        } finally {
-            setLoading(false);
+                // 4. Gọi API
+                let res = await Apis.post(url, form, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                if (res.status === 201) {
+                    Alert.alert("Thành công", "Đăng ký tài khoản thành công!");
+                    nav.replace("Login");
+                }
+            } catch (ex) {
+                console.error(ex);
+                if (ex.response && ex.response.data) {
+                    // Hiển thị lỗi từ server lên các ô input tương ứng
+                    const serverErrors = ex.response.data;
+                    let formattedErrors = {};
+                    for (let key in serverErrors) {
+                        let errorMessage = serverErrors[key];
+                        if (Array.isArray(errorMessage)) errorMessage = errorMessage[0];
+                        formattedErrors[key] = errorMessage;
+                    }
+                    setErrors(formattedErrors);
+                }
+            } finally {
+                setLoading(false);
+            }
         }
-    };
+    }
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={RegisterStyle.container}>
@@ -201,9 +176,10 @@ const Register = () => {
                         </TouchableOpacity>
                     </View>
 
+                    {/* --- SỬA LỖI AVATAR TẠI ĐÂY (dùng user.avatar) --- */}
                     <TouchableOpacity onPress={pickImage} style={RegisterStyle.avatarContainer}>
-                        <View style={[RegisterStyle.avatarWrapper, avatar && RegisterStyle.avatarWrapperSelected]}>
-                            {avatar ? <Image source={{ uri: avatar.uri }} style={{ width: 100, height: 100 }} /> :
+                        <View style={[RegisterStyle.avatarWrapper, user.avatar && RegisterStyle.avatarWrapperSelected]}>
+                            {user.avatar ? <Image source={{ uri: user.avatar.uri }} style={{ width: 100, height: 100 }} /> :
                                 <MaterialCommunityIcons name={role === 'RECRUITER' ? "domain" : "camera-plus"} size={40} color="#2563eb" />}
                         </View>
                         <Text style={RegisterStyle.avatarLabel}>{role === 'RECRUITER' ? "Tải lên Logo" : "Tải lên Ảnh đại diện"}</Text>
@@ -254,9 +230,13 @@ const Register = () => {
                                                 <RadioButton value="MALE" color="#2563eb" />
                                                 <Text style={RegisterStyle.radioLabel}>Nam</Text>
                                             </View>
-                                            <View style={RegisterStyle.row}>
+                                            <View style={[RegisterStyle.row, { marginRight: 20 }]}>
                                                 <RadioButton value="FEMALE" color="#2563eb" />
                                                 <Text style={RegisterStyle.radioLabel}>Nữ</Text>
+                                            </View>
+                                            <View style={RegisterStyle.row}>
+                                                <RadioButton value="OTHER" color="#2563eb" />
+                                                <Text style={RegisterStyle.radioLabel}>Khác</Text>
                                             </View>
                                         </View>
                                     </RadioButton.Group>
