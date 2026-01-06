@@ -105,7 +105,7 @@ DATABASES = {
         'NAME': 'jobhunter',
         'USER': 'root',
         'PASSWORD': '123456',
-        'HOST': ''  # mặc định localhost
+        'HOST': 'quyendz.mysql.pythonanywhere-services.com'  # mặc định localhost
     }
 }
 

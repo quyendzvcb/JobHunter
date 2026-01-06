@@ -1,167 +1,339 @@
 import React, { useState } from "react";
-import { View, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
-import { Button, TextInput, Text, RadioButton, Avatar } from "react-native-paper";
+import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image, Alert } from "react-native";
+import { TextInput, Button, HelperText, RadioButton } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
-// SỬA: Đổi từ Apis thành Api cho đúng với tên file thực tế
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import RegisterStyle from "./RegisterStyle";
 import Apis, { endpoints } from "../../utils/Apis";
-import MyStyles from "../../styles/MyStyles";
+
+// --- 1. COMPONENT INPUT (Đã cập nhật để hiện lỗi đỏ) ---
+const RenderInput = ({ label, value, onChange, icon, secure = false, rightIcon = null, keyboardType = 'default', style = {}, errorText = null }) => (
+    <View style={[RegisterStyle.inputWrapper, style]}>
+        <TextInput
+            mode="outlined"
+            label={label}
+            value={value}
+            onChangeText={onChange}
+            secureTextEntry={secure}
+            keyboardType={keyboardType}
+            style={RegisterStyle.input}
+            outlineColor={errorText ? "#B00020" : "#e5e7eb"}
+            activeOutlineColor={errorText ? "#B00020" : "#2563eb"}
+            textColor="#1f2937"
+            left={
+                <TextInput.Icon
+                    icon={() => (
+                        <View pointerEvents="none" style={{ justifyContent: 'center', alignItems: 'center' }}>
+                            <MaterialCommunityIcons name={icon} size={24} color={errorText ? "#B00020" : "#2563eb"} />
+                        </View>
+                    )}
+                    disabled={true}
+                    style={{ margin: 0, padding: 0 }}
+                />
+            }
+            right={rightIcon}
+        />
+        {errorText && (
+            <HelperText type="error" visible={true} style={{ paddingLeft: 0, fontSize: 12 }}>
+                {errorText}
+            </HelperText>
+        )}
+    </View>
+);
 
 const Register = () => {
     const nav = useNavigation();
     const [loading, setLoading] = useState(false);
     const [role, setRole] = useState("APPLICANT");
     const [avatar, setAvatar] = useState(null);
+    const [showPass, setShowPass] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
-    const [baseInfo, setBaseInfo] = useState({ first_name: "", last_name: "", email: "", username: "", password: "", confirm: "" });
-    const [recruiterInfo, setRecruiterInfo] = useState({ company_name: "", company_location: "", webURL: "" });
-    const [applicantInfo, setApplicantInfo] = useState({ phone_number: "", address: "", gender: "MALE", dob: "" });
+    // State lưu lỗi từ Server
+    const [errors, setErrors] = useState({});
 
-    const updateBase = (k, v) => setBaseInfo(c => ({ ...c, [k]: v }));
-    const updateRec = (k, v) => setRecruiterInfo(c => ({ ...c, [k]: v }));
-    const updateApp = (k, v) => setApplicantInfo(c => ({ ...c, [k]: v }));
+    const [user, setUser] = useState({
+        first_name: "", last_name: "", email: "", username: "", password: "", confirm: "",
+        phone_number: "", address: "", gender: "MALE", dob: "",
+        company_name: "", company_location: "", webURL: ""
+    });
 
-    const pickImage = async () => {
-        let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert("Lỗi", "Bạn cần cấp quyền truy cập thư viện ảnh.");
-            return;
-        }
-
-        let res = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            quality: 1
-        });
-
-        if (!res.canceled) {
-            setAvatar(res.assets[0]);
+    const updateState = (field, value) => {
+        setUser(c => ({ ...c, [field]: value }));
+        if (errors[field]) {
+            setErrors(e => ({ ...e, [field]: null }));
         }
     };
 
-    const register = async () => {
-        // Kiểm tra dữ liệu cơ bản
-        if (!baseInfo.username || !baseInfo.password) {
-            return Alert.alert("Lỗi", "Vui lòng nhập Username và Password");
+    const onDateChange = (event, selectedDate) => {
+        setShowDatePicker(false);
+        if (selectedDate) {
+            const year = selectedDate.getFullYear();
+            const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const day = String(selectedDate.getDate()).padStart(2, '0');
+            updateState('dob', `${year}-${month}-${day}`);
         }
-        if (baseInfo.password !== baseInfo.confirm) {
-            return Alert.alert("Lỗi", "Mật khẩu không khớp");
+    };
+
+    const pickImage = async () => {
+        let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') return Alert.alert("Lỗi", "Cần cấp quyền truy cập ảnh!");
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 0.7,
+        });
+        if (!result.canceled) setAvatar(result.assets[0]);
+    };
+
+    const register = async () => {
+        setErrors({}); // Reset lỗi
+
+        if (user.password !== user.confirm) {
+            setErrors({ confirm: "Mật khẩu xác nhận không khớp!" });
+            return;
         }
 
         setLoading(true);
+
         try {
             let form = new FormData();
 
-            // Append thông tin cơ bản
-            Object.keys(baseInfo).forEach(k => {
-                if (k !== 'confirm') form.append(k, baseInfo[k]);
+            // Append dữ liệu chung
+            ['first_name', 'last_name', 'email', 'username', 'password'].forEach(k => {
+                form.append(k, user[k]);
             });
 
-            // Xử lý Avatar/Logo
+            // Append Avatar (Chú ý: name và type rất quan trọng)
             if (avatar) {
-                const filename = avatar.uri.split('/').pop();
-                const match = /\.(\w+)$/.exec(filename);
-                const type = match ? `image/${match[1]}` : `image`;
-
                 form.append(role === 'RECRUITER' ? 'logo' : 'avatar', {
                     uri: avatar.uri,
-                    name: filename,
-                    type
+                    name: avatar.fileName || 'image.jpg',
+                    type: 'image/jpeg'
                 });
             }
 
-            // Append thông tin riêng theo Role
-            let extra = role === 'APPLICANT' ? applicantInfo : recruiterInfo;
-            Object.keys(extra).forEach(k => form.append(k, extra[k]));
+            // Append dữ liệu theo Role
+            let url = "";
+            if (role === 'APPLICANT') {
+                url = endpoints['register-aplicant'];
+                form.append('phone_number', user.phone_number);
+                form.append('address', user.address);
+                form.append('gender', user.gender);
+                if (user.dob) form.append('dob', user.dob);
+            } else {
+                url = endpoints['register-recruiter'];
+                ['company_name', 'company_location', 'webURL'].forEach(k => form.append(k, user[k]));
+            }
 
-            // Xác định endpoint
-            let url = role === 'APPLICANT' ? endpoints['register-applicant'] : endpoints['register-recruiter'];
+            console.log("Đang gửi đăng ký đến:", url);
 
-            // SỬA: Sử dụng Api (đã fix tên import)
-            let res = await Api.post(url, form, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+            // --- GỌI API (ĐÃ FIX LỖI CONTENT-TYPE) ---
+            // Không set 'Content-Type': 'multipart/form-data' thủ công
+            const res = await Apis.post(url, form, {
+                headers: {
+                    // Để trống Content-Type để Axios tự động thêm boundary
+                    "Accept": "application/json",
+                },
+                transformRequest: (data, headers) => {
+                    return data; // Ngăn Axios serialize FormData
+                },
             });
 
-            if (res.status === 201 || res.status === 200) {
+            if (res.status === 201) {
                 Alert.alert("Thành công", "Đăng ký thành công! Vui lòng đăng nhập.");
                 nav.replace("Login");
             }
+
         } catch (ex) {
-            console.error(ex);
-            Alert.alert("Lỗi", "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");
+            // --- LOG LỖI CHI TIẾT ---
+            console.log("========== LỖI ĐĂNG KÝ ==========");
+            if (ex.response) {
+                // Server trả về response lỗi (4xx, 5xx)
+                console.log("Status:", ex.response.status);
+                console.log("Data:", JSON.stringify(ex.response.data, null, 2));
+
+                // Xử lý hiển thị lỗi lên màn hình
+                const serverErrors = ex.response.data;
+                let formattedErrors = {};
+                for (let key in serverErrors) {
+                    let errorMessage = serverErrors[key];
+                    if (Array.isArray(errorMessage)) errorMessage = errorMessage[0];
+                    formattedErrors[key] = errorMessage;
+                }
+
+                setErrors(formattedErrors);
+
+                if (formattedErrors.non_field_errors) {
+                    Alert.alert("Lỗi", formattedErrors.non_field_errors);
+                } else if (Object.keys(formattedErrors).length > 0) {
+                    Alert.alert("Lỗi nhập liệu", "Vui lòng kiểm tra các ô báo đỏ.");
+                } else {
+                    Alert.alert("Lỗi Server", "Có lỗi xảy ra phía server.");
+                }
+
+            } else if (ex.request) {
+                // Không nhận được phản hồi (Lỗi mạng)
+                console.log("Network Error:", ex.message);
+                Alert.alert("Lỗi kết nối", "Kiểm tra internet hoặc server có đang chạy không?");
+            } else {
+                // Lỗi code
+                console.log("Error Message:", ex.message);
+            }
+            console.log("=================================");
+
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1 }}
-        >
-            <ScrollView style={[MyStyles.container, MyStyles.content]}>
-                <Text style={MyStyles.headerTitle}>ĐĂNG KÝ TÀI KHOẢN</Text>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={RegisterStyle.container}>
+            <ScrollView contentContainerStyle={RegisterStyle.scrollContent} showsVerticalScrollIndicator={false}>
+                <View style={RegisterStyle.content}>
 
-                <View style={[MyStyles.row, { justifyContent: 'center', marginBottom: 15, alignItems: 'center' }]}>
-                    <Text>Bạn là: </Text>
-                    <RadioButton.Group onValueChange={setRole} value={role}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <RadioButton value="APPLICANT" /><Text>Ứng viên</Text>
-                            <RadioButton value="RECRUITER" /><Text style={{ marginLeft: 10 }}>Nhà tuyển dụng</Text>
+                    <View style={RegisterStyle.header}>
+                        <Text style={RegisterStyle.title}>ĐĂNG KÝ</Text>
+                        <Text style={RegisterStyle.subtitle}>Tạo tài khoản mới</Text>
+                    </View>
+
+                    <View style={RegisterStyle.roleContainer}>
+                        <TouchableOpacity
+                            style={[RegisterStyle.roleButton, role === 'APPLICANT' && RegisterStyle.roleButtonActive]}
+                            onPress={() => setRole('APPLICANT')}>
+                            <Text style={[RegisterStyle.roleText, role === 'APPLICANT' && RegisterStyle.roleTextActive]}>Ứng viên</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[RegisterStyle.roleButton, role === 'RECRUITER' && RegisterStyle.roleButtonActive]}
+                            onPress={() => setRole('RECRUITER')}>
+                            <Text style={[RegisterStyle.roleText, role === 'RECRUITER' && RegisterStyle.roleTextActive]}>Nhà tuyển dụng</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <TouchableOpacity onPress={pickImage} style={RegisterStyle.avatarContainer}>
+                        <View style={[RegisterStyle.avatarWrapper, avatar && RegisterStyle.avatarWrapperSelected]}>
+                            {avatar ? <Image source={{ uri: avatar.uri }} style={{ width: 100, height: 100 }} /> :
+                                <MaterialCommunityIcons name={role === 'RECRUITER' ? "domain" : "camera-plus"} size={40} color="#2563eb" />}
                         </View>
-                    </RadioButton.Group>
-                </View>
+                        <Text style={RegisterStyle.avatarLabel}>{role === 'RECRUITER' ? "Tải lên Logo" : "Tải lên Ảnh đại diện"}</Text>
+                    </TouchableOpacity>
 
-                <View style={{ alignItems: 'center', marginBottom: 20 }}>
-                    {avatar ? <Avatar.Image size={80} source={{ uri: avatar.uri }} /> : <Avatar.Icon size={80} icon="camera" />}
-                    <Button onPress={pickImage}>{role === 'RECRUITER' ? "Chọn Logo Công Ty" : "Chọn Ảnh Đại Diện"}</Button>
-                </View>
+                    <View style={RegisterStyle.form}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <RenderInput label="Họ" value={user.last_name} onChange={t => updateState('last_name', t)}
+                                style={RegisterStyle.halfInput} errorText={errors.last_name} />
+                            <RenderInput label="Tên" value={user.first_name} onChange={t => updateState('first_name', t)}
+                                style={RegisterStyle.halfInput} errorText={errors.first_name} />
+                        </View>
 
-                <View style={{ flexDirection: 'row' }}>
-                    <TextInput label="Họ" mode="outlined" style={[MyStyles.input, { flex: 1, marginRight: 5 }]} onChangeText={t => updateBase('last_name', t)} />
-                    <TextInput label="Tên" mode="outlined" style={[MyStyles.input, { flex: 1 }]} onChangeText={t => updateBase('first_name', t)} />
-                </View>
+                        <RenderInput label="Email" value={user.email} onChange={t => updateState('email', t)}
+                            icon="email" errorText={errors.email} />
 
-                <TextInput label="Email" mode="outlined" style={MyStyles.input} keyboardType="email-address" onChangeText={t => updateBase('email', t)} />
-                <TextInput label="Username" mode="outlined" style={MyStyles.input} onChangeText={t => updateBase('username', t)} />
-                <TextInput label="Password" mode="outlined" secureTextEntry style={MyStyles.input} onChangeText={t => updateBase('password', t)} />
-                <TextInput label="Confirm Password" mode="outlined" secureTextEntry style={MyStyles.input} onChangeText={t => updateBase('confirm', t)} />
+                        <RenderInput label="Tên đăng nhập" value={user.username} onChange={t => updateState('username', t)}
+                            icon="account" errorText={errors.username} />
 
-                {role === 'APPLICANT' ? (
-                    <>
-                        <TextInput label="SĐT" mode="outlined" keyboardType="phone-pad" style={MyStyles.input} onChangeText={t => updateApp('phone_number', t)} />
-                        <TextInput label="Địa chỉ" mode="outlined" style={MyStyles.input} onChangeText={t => updateApp('address', t)} />
-                        <TextInput label="Ngày sinh (YYYY-MM-DD)" mode="outlined" style={MyStyles.input} onChangeText={t => updateApp('dob', t)} />
-                        <View style={[MyStyles.row, { alignItems: 'center', marginVertical: 10 }]}>
-                            <Text>Giới tính: </Text>
-                            <RadioButton.Group onValueChange={v => updateApp('gender', v)} value={applicantInfo.gender}>
-                                <View style={MyStyles.row}>
-                                    <RadioButton value="MALE" /><Text>Nam</Text>
-                                    <RadioButton value="FEMALE" /><Text style={{ marginLeft: 10 }}>Nữ</Text>
+                        <RenderInput label="Mật khẩu" value={user.password} onChange={t => updateState('password', t)}
+                            icon="lock" secure={!showPass} errorText={errors.password}
+                            rightIcon={<TextInput.Icon icon={showPass ? "eye-off" : "eye"} color="#2563eb" onPress={() => setShowPass(!showPass)} />} />
+
+                        <RenderInput label="Xác nhận mật khẩu" value={user.confirm} onChange={t => updateState('confirm', t)}
+                            icon="lock-check" secure={!showConfirm} errorText={errors.confirm}
+                            rightIcon={<TextInput.Icon icon={showConfirm ? "eye-off" : "eye"} color="#2563eb" onPress={() => setShowConfirm(!showConfirm)} />} />
+
+                        <Text style={RegisterStyle.sectionTitle}>
+                            {role === 'APPLICANT' ? "Thông tin cá nhân" : "Thông tin doanh nghiệp"}
+                        </Text>
+
+                        {role === 'APPLICANT' ? (
+                            <>
+                                <RenderInput label="Số điện thoại" value={user.phone_number} onChange={t => updateState('phone_number', t)}
+                                    icon="phone" keyboardType="phone-pad" errorText={errors.phone_number} />
+
+                                <RenderInput label="Địa chỉ" value={user.address} onChange={t => updateState('address', t)}
+                                    icon="map-marker" errorText={errors.address} />
+
+                                <TouchableOpacity onPress={() => setShowDatePicker(true)} style={RegisterStyle.inputWrapper}>
+                                    <View pointerEvents="none">
+                                        <TextInput
+                                            mode="outlined"
+                                            label="Ngày sinh (YYYY-MM-DD)"
+                                            value={user.dob}
+                                            editable={false}
+                                            style={RegisterStyle.input}
+                                            outlineColor={errors.dob ? "#B00020" : "#e5e7eb"}
+                                            activeOutlineColor={errors.dob ? "#B00020" : "#2563eb"}
+                                            textColor="#1f2937"
+                                            left={<TextInput.Icon icon={() => <MaterialCommunityIcons name="calendar" size={24} color={errors.dob ? "#B00020" : "#2563eb"} />} disabled={true} />}
+                                        />
+                                    </View>
+                                    {errors.dob && <HelperText type="error" visible={true} style={{ paddingLeft: 0, fontSize: 12 }}>{errors.dob}</HelperText>}
+                                </TouchableOpacity>
+
+                                {showDatePicker && (
+                                    <DateTimePicker
+                                        value={user.dob ? new Date(user.dob) : new Date()}
+                                        mode="date"
+                                        display="default"
+                                        onChange={onDateChange}
+                                        maximumDate={new Date()}
+                                    />
+                                )}
+
+                                <View style={[RegisterStyle.inputWrapper, { marginBottom: 10 }]}>
+                                    <Text style={{ color: '#4b5563', marginBottom: 8, fontWeight: '600' }}>Giới tính:</Text>
+                                    <RadioButton.Group onValueChange={v => updateState('gender', v)} value={user.gender}>
+                                        <View style={RegisterStyle.row}>
+                                            <View style={[RegisterStyle.row, { marginRight: 20 }]}>
+                                                <RadioButton value="MALE" color="#2563eb" />
+                                                <Text style={RegisterStyle.radioLabel}>Nam</Text>
+                                            </View>
+                                            <View style={RegisterStyle.row}>
+                                                <RadioButton value="FEMALE" color="#2563eb" />
+                                                <Text style={RegisterStyle.radioLabel}>Nữ</Text>
+                                            </View>
+                                        </View>
+                                    </RadioButton.Group>
                                 </View>
-                            </RadioButton.Group>
-                        </View>
-                    </>
-                ) : (
-                    <>
-                        <TextInput label="Tên công ty" mode="outlined" style={MyStyles.input} onChangeText={t => updateRec('company_name', t)} />
-                        <TextInput label="Địa chỉ công ty" mode="outlined" style={MyStyles.input} onChangeText={t => updateRec('company_location', t)} />
-                        <TextInput label="Website (URL)" mode="outlined" style={MyStyles.input} onChangeText={t => updateRec('webURL', t)} />
-                    </>
-                )}
+                            </>
+                        ) : (
+                            <>
+                                <RenderInput label="Tên công ty" value={user.company_name} onChange={t => updateState('company_name', t)}
+                                    icon="domain" errorText={errors.company_name} />
 
-                <Button
-                    mode="contained"
-                    onPress={register}
-                    loading={loading}
-                    disabled={loading}
-                    style={[MyStyles.btnPrimary, { marginVertical: 20 }]}
-                    contentStyle={{ height: 50 }}
-                >
-                    ĐĂNG KÝ NGAY
-                </Button>
+                                <RenderInput label="Địa chỉ công ty" value={user.company_location} onChange={t => updateState('company_location', t)}
+                                    icon="map-marker-radius" errorText={errors.company_location} />
+
+                                <RenderInput label="Website" value={user.webURL} onChange={t => updateState('webURL', t)}
+                                    icon="web" errorText={errors.webURL} />
+                            </>
+                        )}
+
+                        <Button
+                            mode="contained"
+                            onPress={register}
+                            loading={loading}
+                            disabled={loading}
+                            style={RegisterStyle.registerButton}
+                            contentStyle={{ height: 55 }}
+                            labelStyle={RegisterStyle.registerButtonText}
+                        >
+                            ĐĂNG KÝ NGAY
+                        </Button>
+
+                        <View style={RegisterStyle.loginContainer}>
+                            <Text style={RegisterStyle.loginText}>Đã có tài khoản? </Text>
+                            <TouchableOpacity onPress={() => nav.replace("Login")}>
+                                <Text style={RegisterStyle.loginLink}>Đăng nhập ngay</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
-}
+};
+
 export default Register;

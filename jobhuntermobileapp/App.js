@@ -8,7 +8,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MyUserContext } from "./utils/contexts/MyUserContext";
 import MyUserReducer from "./utils/reducers/MyUserReducer";
 
-import Welcome from "./screens/Welcome";
+import Welcome from "./screens/Welcome/Welcome";
 import Home from "./screens/Home/Home";
 import Activity from "./screens/Home/Activity"; // Import file mới
 import Profile from "./screens/User/Profile";
