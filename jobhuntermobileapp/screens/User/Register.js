@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platfor
 import { TextInput, Button, HelperText, RadioButton } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import RegisterStyle from "./RegisterStyle";
 import Apis, { endpoints } from "../../utils/Apis";
@@ -22,17 +21,6 @@ const RenderInput = ({ label, value, onChange, icon, secure = false, rightIcon =
             outlineColor={errorText ? "#B00020" : "#e5e7eb"}
             activeOutlineColor={errorText ? "#B00020" : "#2563eb"}
             textColor="#1f2937"
-            left={
-                <TextInput.Icon
-                    icon={() => (
-                        <View pointerEvents="none" style={{ justifyContent: 'center', alignItems: 'center' }}>
-                            <MaterialCommunityIcons name={icon} size={24} color={errorText ? "#B00020" : "#2563eb"} />
-                        </View>
-                    )}
-                    disabled={true}
-                    style={{ margin: 0, padding: 0 }}
-                />
-            }
             right={rightIcon}
         />
         {errorText && (
@@ -230,17 +218,17 @@ const Register = () => {
                         </View>
 
                         <RenderInput label="Email" value={user.email} onChange={t => updateState('email', t)}
-                            icon="email" errorText={errors.email} />
+                            errorText={errors.email} />
 
                         <RenderInput label="Tên đăng nhập" value={user.username} onChange={t => updateState('username', t)}
-                            icon="account" errorText={errors.username} />
+                            errorText={errors.username} />
 
                         <RenderInput label="Mật khẩu" value={user.password} onChange={t => updateState('password', t)}
-                            icon="lock" secure={!showPass} errorText={errors.password}
+                            secure={!showPass} errorText={errors.password}
                             rightIcon={<TextInput.Icon icon={showPass ? "eye-off" : "eye"} color="#2563eb" onPress={() => setShowPass(!showPass)} />} />
 
                         <RenderInput label="Xác nhận mật khẩu" value={user.confirm} onChange={t => updateState('confirm', t)}
-                            icon="lock-check" secure={!showConfirm} errorText={errors.confirm}
+                            secure={!showConfirm} errorText={errors.confirm}
                             rightIcon={<TextInput.Icon icon={showConfirm ? "eye-off" : "eye"} color="#2563eb" onPress={() => setShowConfirm(!showConfirm)} />} />
 
                         <Text style={RegisterStyle.sectionTitle}>
@@ -250,37 +238,13 @@ const Register = () => {
                         {role === 'APPLICANT' ? (
                             <>
                                 <RenderInput label="Số điện thoại" value={user.phone_number} onChange={t => updateState('phone_number', t)}
-                                    icon="phone" keyboardType="phone-pad" errorText={errors.phone_number} />
+                                    keyboardType="phone-pad" errorText={errors.phone_number} />
 
                                 <RenderInput label="Địa chỉ" value={user.address} onChange={t => updateState('address', t)}
-                                    icon="map-marker" errorText={errors.address} />
+                                    errorText={errors.address} />
 
-                                <TouchableOpacity onPress={() => setShowDatePicker(true)} style={RegisterStyle.inputWrapper}>
-                                    <View pointerEvents="none">
-                                        <TextInput
-                                            mode="outlined"
-                                            label="Ngày sinh (YYYY-MM-DD)"
-                                            value={user.dob}
-                                            editable={false}
-                                            style={RegisterStyle.input}
-                                            outlineColor={errors.dob ? "#B00020" : "#e5e7eb"}
-                                            activeOutlineColor={errors.dob ? "#B00020" : "#2563eb"}
-                                            textColor="#1f2937"
-                                            left={<TextInput.Icon icon={() => <MaterialCommunityIcons name="calendar" size={24} color={errors.dob ? "#B00020" : "#2563eb"} />} disabled={true} />}
-                                        />
-                                    </View>
-                                    {errors.dob && <HelperText type="error" visible={true} style={{ paddingLeft: 0, fontSize: 12 }}>{errors.dob}</HelperText>}
-                                </TouchableOpacity>
-
-                                {showDatePicker && (
-                                    <DateTimePicker
-                                        value={user.dob ? new Date(user.dob) : new Date()}
-                                        mode="date"
-                                        display="default"
-                                        onChange={onDateChange}
-                                        maximumDate={new Date()}
-                                    />
-                                )}
+                                <RenderInput label="Ngày sinh(YYYY-MM-DD)" value={user.dob} onChange={t => updateState('dob', t)}
+                                    errorText={errors.dob} />
 
                                 <View style={[RegisterStyle.inputWrapper, { marginBottom: 10 }]}>
                                     <Text style={{ color: '#4b5563', marginBottom: 8, fontWeight: '600' }}>Giới tính:</Text>
@@ -301,13 +265,13 @@ const Register = () => {
                         ) : (
                             <>
                                 <RenderInput label="Tên công ty" value={user.company_name} onChange={t => updateState('company_name', t)}
-                                    icon="domain" errorText={errors.company_name} />
+                                    errorText={errors.company_name} />
 
                                 <RenderInput label="Địa chỉ công ty" value={user.company_location} onChange={t => updateState('company_location', t)}
-                                    icon="map-marker-radius" errorText={errors.company_location} />
+                                    errorText={errors.company_location} />
 
                                 <RenderInput label="Website" value={user.webURL} onChange={t => updateState('webURL', t)}
-                                    icon="web" errorText={errors.webURL} />
+                                    errorText={errors.webURL} />
                             </>
                         )}
 

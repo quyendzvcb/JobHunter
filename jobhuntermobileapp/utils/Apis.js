@@ -9,7 +9,7 @@ export const endpoints = {
     'job_detail': (jobId) => `/jobs/${jobId}/`,
     'login': '/o/token/',
     'current-user': '/users/current-user/',
-    'register-aplicant': '/users/register/applicant/',
+    'register-applicant': '/users/register/applicant/',
     'register-recruiter': '/users/register/recruiter/',
     'apply-job': '/applications/apply/',
     'my-applications': '/applications/',
