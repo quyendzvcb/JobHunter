@@ -75,8 +75,10 @@ class JobViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVie
         if params.get('category_id'):
             qs = qs.filter(category_id=params['category_id'])
 
-        if params.get('location_id'):
-            qs = qs.filter(location__id=params['location_id'])
+        location_ids = params.getlist('location_id')
+
+        if location_ids:
+            qs = qs.filter(location__id__in=location_ids)
 
         if params.get('salary_min'):
             qs = qs.filter(salary_max__gte=int(params['salary_min']))
