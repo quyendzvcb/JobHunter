@@ -14,9 +14,9 @@ import MyUserReducer from "./utils/reducers/MyUserReducer";
 import Welcome from "./screens/Welcome/Welcome";
 import Login from "./screens/User/Login";
 import Register from "./screens/User/Register";
-import Home from "./screens/Home/Home";
-import JobDetail from "./screens/Home/JobDetail";
-import Activity from "./screens/Home/Activity";
+import Home from "./screens/Applicant/Home";
+import JobDetail from "./screens/Applicant/JobDetail";
+import Activity from "./screens/Applicant/MyApplications";
 import Profile from "./screens/User/Profile";
 
 const Stack = createNativeStackNavigator();
