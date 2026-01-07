@@ -7,14 +7,14 @@ export default StyleSheet.create({
     row: { flexDirection: 'row', alignItems: 'center' },
 
     // Typography
-    headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#d32f2f', marginBottom: 10, textAlign: 'center' },
+    headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#1976D2', marginBottom: 10, textAlign: 'center' },
     subTitle: { fontSize: 16, color: 'gray', textAlign: 'center', marginBottom: 20 },
 
     // Components
     card: { backgroundColor: 'white', marginBottom: 10, elevation: 2, borderRadius: 8 },
     input: { marginBottom: 15, backgroundColor: 'white' },
-    btnPrimary: { backgroundColor: '#d32f2f', borderRadius: 8, marginVertical: 10 },
-    btnOutline: { borderColor: '#d32f2f', borderRadius: 8, marginVertical: 10 },
+    btnPrimary: { backgroundColor: '#1976D2', borderRadius: 8, marginVertical: 10 },
+    btnOutline: { borderColor: '#1976D2', borderRadius: 8, marginVertical: 10 },
 
     // Helpers
     mt20: { marginTop: 20 },

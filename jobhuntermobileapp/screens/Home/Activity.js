@@ -17,7 +17,6 @@ const Activity = () => {
 
     // Hàm load dữ liệu tùy theo vai trò
     const loadData = async () => {
-        if (!user) return; // Chưa login thì không load
 
         setLoading(true);
         try {
@@ -36,9 +35,9 @@ const Activity = () => {
     useEffect(() => {
         // Chỉ load dữ liệu khi màn hình được focus VÀ người dùng đã đăng nhập thành công
         if (isFocused && user && user.token) {
-            loadApplications();
+            loadData();
         } else if (isFocused && !user) {
-            setData([]); // Xóa dữ liệu cũ nếu đăng xuất
+            setItems([]); // Xóa dữ liệu cũ nếu đăng xuất
         }
     }, [isFocused, user]);
 

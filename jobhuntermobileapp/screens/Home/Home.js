@@ -46,7 +46,7 @@ const Home = () => {
                         <Text variant="titleMedium" style={{ fontWeight: 'bold' }} numberOfLines={2}>{item.title}</Text>
                         <Text variant="bodySmall" style={{ color: 'gray' }}>{item.recruiter?.company_name}</Text>
                         <View style={[MyStyles.row, { justifyContent: 'space-between', marginTop: 5 }]}>
-                            <Text style={{ color: '#d32f2f', fontWeight: 'bold' }}>{item.salary_min ? `$${item.salary_min}` : 'Thỏa thuận'}</Text>
+                            <Text style={{ color: '#1976D2', fontWeight: 'bold' }}>{item.salary_min ? `$${item.salary_min}` : 'Thỏa thuận'}</Text>
                             <Text style={{ fontSize: 10, color: 'gray' }}>{moment(item.created_at).fromNow()}</Text>
                         </View>
                     </View>
@@ -57,7 +57,7 @@ const Home = () => {
 
     return (
         <View style={MyStyles.container}>
-            <View style={{ backgroundColor: '#d32f2f', padding: 20, paddingBottom: 10 }}>
+            <View style={{ backgroundColor: '#1976D2', padding: 20, paddingBottom: 10 }}>
                 <Searchbar placeholder="Tìm việc, công ty..." value={q} onChangeText={setQ} style={{ borderRadius: 10, backgroundColor: 'white' }} />
                 <FlatList
                     horizontal data={categories} showsHorizontalScrollIndicator={false}
@@ -73,7 +73,7 @@ const Home = () => {
                 />
             </View>
             <View style={{ flex: 1, padding: 10 }}>
-                {loading ? <ActivityIndicator color="#d32f2f" /> : (
+                {loading ? <ActivityIndicator color="#1976D2" /> : (
                     <FlatList
                         data={jobs}
                         renderItem={renderJob}

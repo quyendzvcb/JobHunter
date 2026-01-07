@@ -1,39 +1,49 @@
-import React from "react";
-import { View, Image } from "react-native";
-import { Button, Text } from "react-native-paper";
-import { useNavigation } from "@react-navigation/native";
-import WelcomeStyle from "./WelcomeStyle"; // Import style riêng
+import React from 'react';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
+import styles from './WelcomeStyle';
 
-const Welcome = () => {
-    const nav = useNavigation();
-
+const Welcome = ({ navigation }) => {
     return (
-        <View style={WelcomeStyle.container}>
-            <View style={WelcomeStyle.content}>
+        <View style={styles.container}>
+            {/* Header: Hình ảnh */}
+            <View style={styles.headerContainer}>
+                {/* Thay thế 'icon.png' bằng hình minh họa vector/illustration của bạn nếu có */}
                 <Image
-                    source={{ uri: "https://cdn-icons-png.flaticon.com/512/2936/2936886.png" }}
-                    style={WelcomeStyle.image}
-                    resizeMode="contain"
+                    source={require('../../assets/logo.png')}
+                    style={styles.logo}
                 />
+                <View style={styles.bodyContainer}>
+                    <Text style={styles.title}>Tìm việc làm mơ ước</Text>
+                    <Text style={styles.subTitle}>
+                        Khám phá hàng nghìn cơ hội nghề nghiệp phù hợp với kỹ năng của bạn ngay hôm nay.
+                    </Text>
+                </View>
+            </View>
 
-                <Text style={WelcomeStyle.title}>JOB HUNTER</Text>
+            {/* Body: Tiêu đề & Giới thiệu */}
 
-                <Text style={WelcomeStyle.subtitle}>
-                    Tìm kiếm việc làm mơ ước &{"\n"}Kết nối nhà tuyển dụng hàng đầu.
-                </Text>
 
-                <Button
-                    mode="contained"
-                    style={WelcomeStyle.button}
-                    contentStyle={WelcomeStyle.buttonContent}
-                    labelStyle={WelcomeStyle.buttonLabel}
-                    onPress={() => nav.replace("Login")} // Chuyển sang Login thay vì MainApp để đúng luồng
+            {/* Footer: Các nút hành động */}
+            <View style={styles.footerContainer}>
+                {/* Nút 1: Khám phá (Vào App chế độ Khách) */}
+                <TouchableOpacity
+                    style={styles.btnPrimary}
+                    onPress={() => navigation.navigate('Home')}
                 >
-                    BẮT ĐẦU NGAY
-                </Button>
+                    <Text style={styles.btnPrimaryText}>Khám phá ứng dụng</Text>
+                </TouchableOpacity>
+
+                {/* Nút 2: Đăng nhập */}
+                <TouchableOpacity
+                    style={[styles.btnSecondary, { backgroundColor: '#E3F2FD' }]} // Xanh nhạt
+                    onPress={() => navigation.navigate('Login')}
+                >
+                    <Text style={[styles.btnSecondaryText, { color: '#1976D2' }]}>Đăng nhập</Text>
+                </TouchableOpacity>
+
             </View>
         </View>
     );
-}
+};
 
 export default Welcome;

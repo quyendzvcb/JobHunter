@@ -5,17 +5,19 @@ import RenderHtml from 'react-native-render-html';
 import Apis, { authApis, endpoints } from "../../utils/Apis";
 import { MyUserContext } from "../../utils/contexts/MyUserContext";
 import MyStyles from "../../styles/MyStyles";
+import { useNavigation } from "@react-navigation/native";
 
 const JobDetail = ({ route }) => {
     const { jobId } = route.params;
     const [job, setJob] = useState(null);
     const { width } = useWindowDimensions();
     const [user] = useContext(MyUserContext);
+    const nav = useNavigation(); // Thêm hook navigation
 
     useEffect(() => {
         const load = async () => {
             try {
-                const res = await Apis.get(endpoints['job-details'](jobId));
+                const res = await Apis.get(endpoints['job-detail'](jobId));
                 setJob(res.data);
             } catch (e) { console.error(e); }
         }
@@ -23,7 +25,23 @@ const JobDetail = ({ route }) => {
     }, [jobId]);
 
     const apply = async () => {
-        if (!user) return Alert.alert("Thông báo", "Vui lòng đăng nhập để ứng tuyển!");
+        // LOGIC MỚI: Nếu chưa đăng nhập -> Chuyển sang Login, dặn Login xong thì quay lại đây
+        if (!user) {
+            Alert.alert(
+                "Yêu cầu đăng nhập",
+                "Bạn cần đăng nhập để ứng tuyển công việc này.",
+                [
+                    { text: "Hủy", style: "cancel" },
+                    {
+                        text: "Đăng nhập ngay",
+                        onPress: () => nav.navigate("Login", { next: "JobDetail", params: { jobId: jobId } })
+                    }
+                ]
+            );
+            return;
+        }
+
+        // Logic cũ: Đã có user thì gọi API
         try {
             let form = new FormData();
             form.append("job", jobId);
@@ -32,15 +50,15 @@ const JobDetail = ({ route }) => {
         } catch (e) { Alert.alert("Lỗi", "Đã có lỗi xảy ra hoặc bạn đã ứng tuyển rồi."); }
     }
 
-    if (!job) return <Text>Đang tải...</Text>;
+    if (!job) return <Text style={{ padding: 20 }}>Đang tải...</Text>;
 
     return (
         <ScrollView style={[MyStyles.container, { backgroundColor: 'white' }]}>
             <View style={{ padding: 20, alignItems: 'center', backgroundColor: '#fff5f5' }}>
-                <Image source={{ uri: job.recruiter.logo }} style={{ width: 80, height: 80 }} resizeMode="contain" />
-                <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 10 }}>{job.title}</Text>
-                <Text style={{ color: 'gray' }}>{job.recruiter.company_name}</Text>
-                <Text style={{ color: '#d32f2f', fontWeight: 'bold', fontSize: 18, marginTop: 5 }}>
+                <Image source={{ uri: job.recruiter?.logo || "https://via.placeholder.com/100" }} style={{ width: 80, height: 80 }} resizeMode="contain" />
+                <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 10, textAlign: 'center' }}>{job.title}</Text>
+                <Text style={{ color: 'gray' }}>{job.recruiter?.company_name}</Text>
+                <Text style={{ color: '#1976D2', fontWeight: 'bold', fontSize: 18, marginTop: 5 }}>
                     {job.salary_min ? `$${job.salary_min} - $${job.salary_max}` : 'Thỏa thuận'}
                 </Text>
             </View>

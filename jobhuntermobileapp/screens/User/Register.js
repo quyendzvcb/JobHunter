@@ -8,7 +8,7 @@ import RegisterStyle from "./RegisterStyle";
 import Apis, { endpoints } from "../../utils/Apis";
 
 // --- COMPONENT INPUT ---
-const RenderInput = ({ label, value, onChange, icon, secure = false, rightIcon = null, keyboardType = 'default', style = {}, errorText = null }) => (
+const RenderInput = ({ label, value, onChange, secure = false, rightIcon = null, keyboardType = 'default', style = {}, errorText = null }) => (
     <View style={[RegisterStyle.inputWrapper, style]}>
         <TextInput
             mode="outlined"
@@ -49,7 +49,6 @@ const Register = () => {
 
     const updateState = (field, value) => {
         setUser(current => ({ ...current, [field]: value }));
-        // Xóa lỗi khi người dùng bắt đầu nhập lại
         if (errors[field]) {
             setErrors(e => ({ ...e, [field]: null }));
         }

@@ -9,8 +9,6 @@ import { MyUserContext } from "../../utils/contexts/MyUserContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // THÔNG TIN OAUTH2 (Thay bằng thông tin thực tế của bạn)
-const CLIENT_ID = "qCIXUuHLngrsgjhSayw5Ah0fuBUbtaIfDFGozTJW";
-const CLIENT_SECRET = "CeoKoM5FzZCRUXvRgv2DkgNG7r8faBxsoZM7XwErMvvYhfgVLoReRzmjVRfEyHDyeIHBMPDX2ldWTW0LYHXNYY8i7gSKfdynOgb4oMm7ZtrEILrVkKGeZ6CILsxKVM5O";
 
 // --- COMPONENT INPUT (Đưa ra ngoài để tránh lag - Giống Register) ---
 const RenderInput = ({ label, value, onChange, icon, secure = false, rightIcon = null, style = {} }) => (
@@ -33,8 +31,6 @@ const RenderInput = ({ label, value, onChange, icon, secure = false, rightIcon =
                             <MaterialCommunityIcons name={icon} size={24} color="#2563eb" />
                         </View>
                     )}
-                    disabled={true}
-                    style={{ margin: 0, padding: 0 }}
                 />
             }
             right={rightIcon}
@@ -70,8 +66,8 @@ const Login = () => {
             const res = await Apis.post(endpoints['login'], {
                 ...user,
                 'grant_type': 'password',
-                'client_id': CLIENT_ID,
-                'client_secret': CLIENT_SECRET
+                'client_id': process.env.EXPO_PUBLIC_CLIENT_ID,
+                'client_secret': process.env.EXPO_PUBLIC_CLIENT_SECRET
             }, {
                 headers: { "Content-Type": "application/x-www-form-urlencoded" }
             });

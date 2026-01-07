@@ -6,7 +6,7 @@ export const endpoints = {
     'categories': '/categories/',
     'locations': '/locations/',
     'jobs': '/jobs/',
-    'job_detail': (jobId) => `/jobs/${jobId}/`,
+    'job-detail': (jobId) => `/jobs/${jobId}/`,
     'login': '/o/token/',
     'current-user': '/users/current-user/',
     'register-applicant': '/users/register/applicant/',

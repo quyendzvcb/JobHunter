@@ -23,7 +23,7 @@ const Profile = () => {
                 <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>Bạn chưa đăng nhập</Text>
                 <View style={{ width: '100%' }}>
                     <Button mode="contained" style={MyStyles.btnPrimary} onPress={() => nav.navigate("Login")}>ĐĂNG NHẬP</Button>
-                    <Button mode="outlined" style={MyStyles.btnOutline} textColor="#d32f2f" onPress={() => nav.navigate("Register")}>ĐĂNG KÝ</Button>
+                    <Button mode="outlined" style={MyStyles.btnOutline} textColor="#1976D2" onPress={() => nav.navigate("Register")}>ĐĂNG KÝ</Button>
                 </View>
             </View>
         );
