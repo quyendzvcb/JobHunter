@@ -5,7 +5,7 @@ const BASE_URL = 'https://quyendz.pythonanywhere.com/';
 export const endpoints = {
     'categories': '/categories/',
     'locations': '/locations/',
-    'jobs': '/jobs/',
+    'jobs': (params) => `/jobs/${params ? '?' + params : ''}`,
     'job-detail': (jobId) => `/jobs/${jobId}/`,
     'job-compare': (ids) => `/jobs/compare/?ids=${ids}`,
     'login': '/o/token/',
@@ -15,8 +15,8 @@ export const endpoints = {
 
     // Application
     'apply-job': '/applications/apply/',
-    'my-applications': '/applications/', 
-    'evaluate-application': (appId) => `/applications/${appId}/evaluate/`, 
+    'my-applications': '/applications/',
+    'evaluate-application': (appId) => `/applications/${appId}/evaluate/`,
 
     // Recruiter specific (Thêm mới)
     'recruiter-jobs': '/recruiter/jobs/',

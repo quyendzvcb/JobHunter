@@ -18,6 +18,7 @@ import Home from "./screens/Applicant/Home";
 import JobDetail from "./screens/Applicant/JobDetail";
 import Activity from "./screens/Applicant/MyApplications";
 import Profile from "./screens/User/Profile";
+import ApplyJob from "./screens/Applicant/ApplyJob";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -28,6 +29,7 @@ const JobSearchStack = () => (
     <Stack.Screen name="Home" component={Home} options={{ title: "Việc làm nổi bật", headerShown: false }} />
     <Stack.Screen name="JobDetail" component={JobDetail} options={{ title: "Chi tiết công việc" }} />
     <Stack.Screen name="Profile" component={Profile} options={{ title: "Cá nhân" }} />
+    <Stack.Screen name="ApplyJob" component={ApplyJob} options={{ headerShown: true, title: "Ứng tuyển" }} />
   </Stack.Navigator>
 );
 
@@ -52,14 +54,14 @@ const TabNavigator = () => {
         }}
       />
 
-        <Tab.Screen
-          name="ActivityTab"
-          component={ActivityStack}
-          options={{
-            title: user?.role === "RECRUITER" ? "Ứng viên" : "Hồ sơ đã nộp",
-            tabBarIcon: ({ color }) => <MaterialCommunityIcons name="file-document-multiple" size={26} color={color} />
-          }}
-        />
+      <Tab.Screen
+        name="ActivityTab"
+        component={ActivityStack}
+        options={{
+          title: user?.role === "RECRUITER" ? "Ứng viên" : "Hồ sơ đã nộp",
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="file-document-multiple" size={26} color={color} />
+        }}
+      />
 
       <Tab.Screen
         name="ProfileTab"

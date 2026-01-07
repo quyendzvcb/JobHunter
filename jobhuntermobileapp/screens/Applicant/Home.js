@@ -1,89 +1,55 @@
-import React, { useEffect, useState } from "react";
-import { View, FlatList, TouchableOpacity, RefreshControl, Image } from "react-native";
-import { Searchbar, Text, Chip, ActivityIndicator, Card } from "react-native-paper";
-import Apis, { endpoints } from "../../utils/Apis";
-import { useNavigation } from "@react-navigation/native";
-import MyStyles from "../../styles/MyStyles";
-import moment from "moment";
+import React, { useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Provider, Portal, Modal } from 'react-native-paper';
+import JobsList from '../../components/Job/JobsList'; // Import component vừa tách
+import JobFilterModal from '../../components/Job/JobFilterModal';
 
-const Home = () => {
-    const [jobs, setJobs] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [q, setQ] = useState("");
-    const [cateId, setCateId] = useState(null);
-    const nav = useNavigation();
+const Home = ({ navigation }) => {
+    // State bộ lọc nằm ở Screen cha để quản lý Modal dễ dàng
+    const [filters, setFilters] = useState({
+        category_id: null,
+        location_id: null,
+        salary_min: null,
+        ordering: '-created_at'
+    });
 
-    useEffect(() => {
-        const loadCates = async () => {
-            try {
-                const res = await Apis.get(endpoints['categories']);
-                setCategories(res.data.results);
-            } catch (e) { console.error(e); }
-        }
-        loadCates();
-    }, []);
+    const [modalVisible, setModalVisible] = useState(false);
 
-    const loadJobs = async () => {
-        setLoading(true);
-        try {
-            let url = `${endpoints['jobs']}?q=${q}`;
-            if (cateId) url += `&category_id=${cateId}`;
-            const res = await Apis.get(url);
-            setJobs(res.data.results);
-        } catch (e) { console.error(e); }
-        finally { setLoading(false); }
-    }
-
-    useEffect(() => { loadJobs(); }, [q, cateId]);
-
-    const renderJob = ({ item }) => (
-        <TouchableOpacity onPress={() => nav.navigate("JobDetail", { jobId: item.id })}>
-            <Card style={MyStyles.card}>
-                <Card.Content style={{ flexDirection: 'row' }}>
-                    <Image source={{ uri: item.recruiter?.logo || 'https://via.placeholder.com/60' }} style={{ width: 60, height: 60, borderRadius: 5, marginRight: 15 }} resizeMode="contain" />
-                    <View style={{ flex: 1 }}>
-                        <Text variant="titleMedium" style={{ fontWeight: 'bold' }} numberOfLines={2}>{item.title}</Text>
-                        <Text variant="bodySmall" style={{ color: 'gray' }}>{item.recruiter?.company_name}</Text>
-                        <View style={[MyStyles.row, { justifyContent: 'space-between', marginTop: 5 }]}>
-                            <Text style={{ color: '#1976D2', fontWeight: 'bold' }}>{item.salary_min ? `$${item.salary_min}` : 'Thỏa thuận'}</Text>
-                            <Text style={{ fontSize: 10, color: 'gray' }}>{moment(item.created_at).fromNow()}</Text>
-                        </View>
-                    </View>
-                </Card.Content>
-            </Card>
-        </TouchableOpacity>
-    );
+    const applyFilters = (newFilters) => {
+        setFilters({ ...filters, ...newFilters });
+        setModalVisible(false);
+    };
 
     return (
-        <View style={MyStyles.container}>
-            <View style={{ backgroundColor: '#1976D2', padding: 20, paddingBottom: 10 }}>
-                <Searchbar placeholder="Tìm việc, công ty..." value={q} onChangeText={setQ} style={{ borderRadius: 10, backgroundColor: 'white' }} />
-                <FlatList
-                    horizontal data={categories} showsHorizontalScrollIndicator={false}
-                    keyExtractor={i => i.id.toString()}
-                    style={{ marginTop: 10 }}
-                    renderItem={({ item }) => (
-                        <Chip
-                            selected={cateId === item.id}
-                            onPress={() => setCateId(cateId === item.id ? null : item.id)}
-                            style={{ marginRight: 8, backgroundColor: cateId === item.id ? '#ffcdd2' : 'white' }}
-                        >{item.name}</Chip>
-                    )}
+        <Provider>
+            <View style={styles.container}>
+                <JobsList
+                    navigation={navigation}
+                    filters={filters}
+                    setFilters={setFilters}
+                    onOpenFilter={() => setModalVisible(true)}
                 />
+                <Portal>
+                    <Modal
+                        visible={modalVisible}
+                        onDismiss={() => setModalVisible(false)}
+                        contentContainerStyle={styles.modalContent}
+                    >
+                        <JobFilterModal
+                            currentFilters={filters}
+                            onApply={applyFilters}
+                            onClose={() => setModalVisible(false)}
+                        />
+                    </Modal>
+                </Portal>
             </View>
-            <View style={{ flex: 1, padding: 10 }}>
-                {loading ? <ActivityIndicator color="#1976D2" /> : (
-                    <FlatList
-                        data={jobs}
-                        renderItem={renderJob}
-                        keyExtractor={i => i.id.toString()}
-                        refreshControl={<RefreshControl refreshing={loading} onRefresh={loadJobs} />}
-                    />
-                )}
-            </View>
-        </View>
+        </Provider>
     );
-}
+};
+
+const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: '#f5f5f5', marginTop: 30 },
+    modalContent: { backgroundColor: 'white', padding: 20, margin: 20, borderRadius: 10 },
+});
 
 export default Home;

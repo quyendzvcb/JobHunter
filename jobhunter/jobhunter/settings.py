@@ -37,7 +37,8 @@ import cloudinary
 cloudinary.config(
     cloud_name="dqbheiddg",
     api_key="434142617659482",
-    api_secret="PIm-pf4A7oFGj0WO4Eu8oCuDtW8"
+    api_secret="PIm-pf4A7oFGj0WO4Eu8oCuDtW8",
+    api_proxy = "http://proxy.server:3128"
 )
 
 INSTALLED_APPS = [
@@ -159,5 +160,3 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CLIENT_ID = "qCIXUuHLngrsgjhSayw5Ah0fuBUbtaIfDFGozTJW"
-CLIENT_SECRET = "CeoKoM5FzZCRUXvRgv2DkgNG7r8faBxsoZM7XwErMvvYhfgVLoReRzmjVRfEyHDyeIHBMPDX2ldWTW0LYHXNYY8i7gSKfdynOgb4oMm7ZtrEILrVkKGeZ6CILsxKVM5O"
