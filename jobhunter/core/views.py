@@ -135,7 +135,7 @@ class ApplicationViewSet(viewsets.ViewSet, generics.ListAPIView):
     def apply_job(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(applicant=request.user.applicant)
+        serializer.save(applicant=request.user.applicant, cv_url=request.data.get('cv_url'))
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(methods=['patch'], detail=True, url_path='evaluate', permission_classes=[perms.IsVerifiedRecruiter])

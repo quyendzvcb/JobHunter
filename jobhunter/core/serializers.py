@@ -70,22 +70,16 @@ class ApplicationSerializer(serializers.ModelSerializer):
     job_detail = JobLiteSerializer(source='job', read_only=True)
 
     job = serializers.PrimaryKeyRelatedField(queryset=Job.objects.all(), write_only=True)
-    cv_file = serializers.FileField(required=True)
+    cv_url = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Application
         fields = [
-            'id', 'status', 'cover_letter', 'cv_file', 'recruiter_rating', 'created_at',
+            'id', 'status', 'cover_letter', 'cv_url', 'recruiter_rating', 'created_at',
             'applicant_detail', 'job_detail',
             'job'
         ]
         read_only_fields = ['created_at','updated_at', 'status', 'recruiter_rating']
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if instance.cv_file:
-            data['cv_file'] = instance.cv_file.url if instance.cv_file else ''
-        return data
 
     def validate(self, attrs):
         request = self.context.get('request')
