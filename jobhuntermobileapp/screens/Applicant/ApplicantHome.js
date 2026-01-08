@@ -4,7 +4,7 @@ import { Provider, Portal, Modal } from 'react-native-paper';
 import JobsList from '../../components/Job/JobsList'; // Import component vừa tách
 import JobFilterModal from '../../components/Job/JobFilterModal';
 
-const Home = ({ navigation }) => {
+const ApplicantHome = ({ navigation }) => {
     // State bộ lọc nằm ở Screen cha để quản lý Modal dễ dàng
     const [filters, setFilters] = useState({
         category_id: null,
@@ -52,4 +52,4 @@ const styles = StyleSheet.create({
     modalContent: { backgroundColor: 'white', padding: 20, margin: 20, borderRadius: 10 },
 });
 
-export default Home;
+export default ApplicantHome;
