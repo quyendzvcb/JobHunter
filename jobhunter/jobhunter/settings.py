@@ -43,15 +43,6 @@ cloudinary.config(
   secure = True
 )
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dqbheiddg',
-    'API_KEY': '434142617659482',
-    'API_SECRET': 'PIm-pf4A7oFGj0WO4Eu8oCuDtW8',
-}
-
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -66,8 +57,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'oauth2_provider',
-    'cloudinary',
-    'cloudinary_storage'
 ]
 
 REST_FRAMEWORK = {

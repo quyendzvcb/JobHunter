@@ -1,10 +1,9 @@
-import React, { useContext, useReducer, useEffect, useState } from "react";
+import React, { useContext, useReducer } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Provider as PaperProvider } from 'react-native-paper';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Cần cài đặt thư viện này
 
 // --- Context & Reducer ---
 import { MyUserContext } from "./utils/contexts/MyUserContext";
@@ -14,58 +13,89 @@ import MyUserReducer from "./utils/reducers/MyUserReducer";
 import Welcome from "./screens/Welcome/Welcome";
 import Login from "./screens/User/Login";
 import Register from "./screens/User/Register";
-import Home from "./screens/Applicant/Home";
+import ApplicantHome from "./screens/Applicant/ApplicantHome";
 import JobDetail from "./screens/Applicant/JobDetail";
-import Activity from "./screens/Applicant/MyApplications";
 import Profile from "./screens/User/Profile";
 import ApplyJob from "./screens/Applicant/ApplyJob";
+import MyApplications from "./screens/Applicant/MyApplications";
+import RecruiterHome from "./screens/Recruiter/RecruiterHome"; // Import màn hình Recruiter mới
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+// --- CÁC STACK NAVIGATOR CON ---
 
+// 1. Stack Tìm việc (Dành cho Ứng viên)
 const JobSearchStack = () => (
   <Stack.Navigator>
-    <Stack.Screen name="Home" component={Home} options={{ title: "Việc làm nổi bật", headerShown: false }} />
+    <Stack.Screen name="ApplicantHome" component={ApplicantHome} options={{ headerShown: false }} />
     <Stack.Screen name="JobDetail" component={JobDetail} options={{ title: "Chi tiết công việc" }} />
-    <Stack.Screen name="Profile" component={Profile} options={{ title: "Cá nhân" }} />
-    <Stack.Screen name="ApplyJob" component={ApplyJob} options={{ headerShown: true, title: "Ứng tuyển" }} />
+    <Stack.Screen name="ApplyJob" component={ApplyJob} options={{ title: "Ứng tuyển" }} />
   </Stack.Navigator>
 );
 
+// 2. Stack Quản lý tin (Dành cho Recruiter)
+const RecruiterDashboardStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen name="RecruiterHome" component={RecruiterHome} options={{ headerShown: false }} />
+    {/* Sau này thêm: CreateJob, EditJob ở đây */}
+  </Stack.Navigator>
+);
+
+// 3. Stack Hoạt động (Dùng chung tên Stack nhưng component bên trong sẽ linh hoạt)
 const ActivityStack = () => (
   <Stack.Navigator>
-    <Stack.Screen name="ActivityList" component={Activity} options={{ title: "Hoạt động", headerShown: false }} />
+    <Stack.Screen name="ApplicationList" component={MyApplications} options={{ headerShown: false }} />
+    <Stack.Screen name="JobDetail" component={JobDetail} options={{ title: "Chi tiết công việc" }} />
   </Stack.Navigator>
 );
 
-const TabNavigator = () => {
-  const [user] = useContext(MyUserContext);
-  const activeColor = "#1976D2";
+// 4. Stack Cá nhân (Dùng chung)
+const ProfileStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
+  </Stack.Navigator>
+);
 
+// --- TAB NAVIGATOR CHÍNH (GỘP CHUNG) ---
+const MainTabNavigator = () => {
+  const [user] = useContext(MyUserContext);
+  const isRecruiter = user?.role === "RECRUITER";
   return (
-    <Tab.Navigator screenOptions={{ tabBarActiveTintColor: activeColor, headerShown: false }}>
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
       <Tab.Screen
         name="HomeTab"
-        component={JobSearchStack}
+        component={isRecruiter ? RecruiterDashboardStack : JobSearchStack}
         options={{
-          title: user?.role === "RECRUITER" ? "Tuyển dụng" : "Tìm việc",
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="briefcase-search" size={26} color={color} />
+          title: isRecruiter ? "Quản lý" : "Tìm việc",
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons
+              name={isRecruiter ? "view-dashboard" : "briefcase-search"}
+              size={26} color={color}
+            />
+          )
         }}
       />
 
+      {/* TAB 2: HOẠT ĐỘNG (Ứng viên / Hồ sơ) */}
       <Tab.Screen
         name="ActivityTab"
-        component={ActivityStack}
+        component={ActivityStack} // Dùng chung ActivityStack vì MyApplications đã xử lý logic hiển thị bên trong rồi
         options={{
-          title: user?.role === "RECRUITER" ? "Ứng viên" : "Hồ sơ đã nộp",
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="file-document-multiple" size={26} color={color} />
+          title: isRecruiter ? "Ứng viên" : "Hồ sơ",
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons
+              name={isRecruiter ? "account-group" : "file-document-multiple"}
+              size={26} color={color}
+            />
+          )
         }}
       />
 
+      {/* TAB 3: CÁ NHÂN */}
       <Tab.Screen
         name="ProfileTab"
-        component={Profile}
+        component={ProfileStack}
         options={{
           title: "Cá nhân",
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account-circle" size={26} color={color} />
@@ -75,6 +105,7 @@ const TabNavigator = () => {
   );
 };
 
+// --- APP COMPONENT ---
 const App = () => {
   const [user, dispatch] = useReducer(MyUserReducer, null);
 
@@ -83,15 +114,16 @@ const App = () => {
       <PaperProvider>
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
-            {user ? (
-              <Stack.Screen name="Home" component={TabNavigator} />
-            ) : (
+            {!user ? (
+              // Chưa đăng nhập
               <>
                 <Stack.Screen name="Welcome" component={Welcome} />
-                <Stack.Screen name="Login" component={Login} options={{ headerShown: true, title: "Đăng nhập" }} />
-                <Stack.Screen name="Register" component={Register} options={{ headerShown: true, title: "Đăng ký" }} />
-                <Stack.Screen name="Home" component={TabNavigator} />
+                <Stack.Screen name="Login" component={Login} />
+                <Stack.Screen name="Register" component={Register} />
               </>
+            ) : (
+              // Đã đăng nhập -> Vào thẳng Tab chính
+              <Stack.Screen name="MainApp" component={MainTabNavigator} />
             )}
           </Stack.Navigator>
         </NavigationContainer>

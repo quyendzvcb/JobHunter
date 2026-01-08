@@ -12,45 +12,22 @@ const ApplyJob = ({ route, navigation }) => {
     const { jobId } = route.params;
     const [user] = useContext(MyUserContext);
 
-    // States
-    const [newFile, setNewFile] = useState(null); // Lưu object ảnh được chọn
+    const [newFile, setNewFile] = useState(null);
     const [fullName, setFullName] = useState(user.applicant?.full_name || '');
     const [phone, setPhone] = useState(user.applicant?.phone_number || '');
     const [coverLetter, setCoverLetter] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // [THAY ĐỔI] Hàm chọn ẢNH từ thư viện
     const pickImage = async () => {
-        try {
-            // Yêu cầu quyền truy cập thư viện
-            let result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images, // Chỉ lấy ảnh
-                quality: 1, // Chất lượng cao nhất
-                allowsEditing: false, // Set true nếu muốn crop ảnh
-            });
+        let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-            if (!result.canceled && result.assets && result.assets.length > 0) {
-                const asset = result.assets[0];
-
-                // Xử lý tên file và mimeType (vì Android đôi khi trả về null)
-                let localUri = asset.uri;
-                let filename = asset.fileName || localUri.split('/').pop();
-
-                // Tự đoán đuôi file nếu thiếu mimeType
-                let match = /\.(\w+)$/.exec(filename);
-                let type = asset.mimeType || (match ? `image/${match[1]}` : `image/jpeg`);
-
-                // Lưu vào state theo đúng cấu trúc cũ để logic bên dưới không phải sửa
-                setNewFile({
-                    uri: localUri,
-                    name: filename,
-                    mimeType: type,
-                    size: asset.fileSize || 0
-                });
+        if (status !== "granted") {
+            alert("Permissions denied!");
+        } else {
+            const result = await ImagePicker.launchImageLibraryAsync();
+            if (!result.canceled) {
+                setNewFile(result.assets[0]);
             }
-        } catch (err) {
-            console.log("Lỗi chọn ảnh:", err);
-            Alert.alert("Lỗi", "Không thể mở thư viện ảnh");
         }
     };
 
@@ -68,7 +45,7 @@ const ApplyJob = ({ route, navigation }) => {
         setLoading(true);
 
         try {
-            const cvUrl = await uploadToCloudinary(newFile.uri, newFile.name, newFile.mimeType);
+            const cvUrl = await uploadToCloudinary(newFile);
 
             console.log(cvUrl);
             if (!cvUrl) {
@@ -85,6 +62,11 @@ const ApplyJob = ({ route, navigation }) => {
             formData.append('cover_letter', coverLetter);
             formData.append('job', jobId);
             formData.append('cv_url', cvUrl);
+            console.log("Dữ liệu gửi đi:", {
+                cover_letter: coverLetter,
+                job: jobId,
+                cv_url: cvUrl
+            });
 
             const res = await authApis(token).post(endpoints['apply-job'], formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
@@ -98,7 +80,7 @@ const ApplyJob = ({ route, navigation }) => {
 
         } catch (error) {
             console.error("Lỗi gửi đơn:", error);
-            Alert.alert("Lỗi", "Có lỗi xảy ra khi gửi đơn ứng tuyển.");
+            Alert.alert("Lỗi", "Bạn đã nộp đơn ứng tuyển cho công việc này rồi");
         } finally {
             setLoading(false);
         }

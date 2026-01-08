@@ -10,7 +10,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const JobDetail = ({ route }) => {
     const { jobId } = route.params;
     const [job, setJob] = useState(null);
-    const { width } = useWindowDimensions();
     const [user] = useContext(MyUserContext);
     const nav = useNavigation(); // Thêm hook navigation
 

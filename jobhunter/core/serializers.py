@@ -86,7 +86,11 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
         if request and request.method == 'POST':
             job = attrs.get('job')
-            applicant = hasattr(request.user, 'applicant')
+            if not hasattr(request.user, 'applicant'):
+                raise serializers.ValidationError(
+                    {"message": "Chỉ ứng viên mới có thể nộp đơn ứng tuyển."}
+                )
+            applicant = request.user.applicant
             if Application.objects.filter(applicant=applicant, job=job).exists():
                 raise serializers.ValidationError(
                     {"message": "Bạn đã nộp hồ sơ cho công việc này rồi!"}

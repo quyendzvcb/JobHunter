@@ -39,19 +39,8 @@ const Profile = () => {
                     {user.role === 'RECRUITER' ? 'Nhà Tuyển Dụng' : 'Ứng Viên'}
                 </Chip>
             </View>
-
-            <List.Section style={{ backgroundColor: 'white', marginTop: 15 }}>
-                <List.Subheader>Cài đặt chung</List.Subheader>
-                <List.Item title="Chỉnh sửa thông tin" left={props => <List.Icon {...props} icon="account-edit" />} onPress={() => Alert.alert("Thông báo", "Tính năng đang phát triển")} />
-                <Divider />
-                <List.Item title="Đổi mật khẩu" left={props => <List.Icon {...props} icon="lock-reset" />} />
-                <Divider />
-                <List.Item title="Trợ giúp & Phản hồi" left={props => <List.Icon {...props} icon="help-circle-outline" />} />
-            </List.Section>
-
-            {/* Chỉ hiện nút xem nhanh Activity nếu muốn dẫn người dùng sang tab kia */}
             <View style={{ padding: 15 }}>
-                <Button mode="outlined" style={MyStyles.btnOutline} textColor="#d32f2f" onPress={() => nav.navigate("Activity")}>
+                <Button mode="outlined" style={MyStyles.btnOutline} textColor="#d32f2f" onPress={() => nav.navigate("ActivityTab", { screen: 'ApplicationList' })}>
                     {user.role === 'RECRUITER' ? 'QUẢN LÝ ỨNG VIÊN' : 'XEM LỊCH SỬ ỨNG TUYỂN'}
                 </Button>
                 <Button mode="contained" onPress={logout} style={{ backgroundColor: '#555', marginTop: 10 }}>ĐĂNG XUẤT</Button>
