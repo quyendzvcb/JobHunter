@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-%1cnm53y!vq)6)82v&a6%4)x)$2rt+udrle927*bz6+r(q4q8!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['quyendz.pythonanywhere.com']
 
 # Application definition
 
@@ -116,9 +116,9 @@ WSGI_APPLICATION = 'jobhunter.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'jobhunter',
-        'USER': 'root',
-        'PASSWORD': '123456',
+        'NAME': 'quyendz$johunterdb',
+        'USER': 'quyendz',
+        'PASSWORD': 'quyen03032005',
         'HOST': 'quyendz.mysql.pythonanywhere-services.com'  # mặc định localhost
     }
 }
