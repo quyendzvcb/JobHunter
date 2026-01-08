@@ -33,13 +33,24 @@ ALLOWED_HOSTS = []
 
 
 import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
-cloudinary.config(
-    cloud_name="dqbheiddg",
-    api_key="434142617659482",
-    api_secret="PIm-pf4A7oFGj0WO4Eu8oCuDtW8",
-    api_proxy = "http://proxy.server:3128"
+cloudinary.config( 
+  cloud_name = "dqbheiddg", 
+  api_key = "434142617659482", 
+  api_secret = "PIm-pf4A7oFGj0WO4Eu8oCuDtW8",
+  secure = True
 )
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dqbheiddg',
+    'API_KEY': '434142617659482',
+    'API_SECRET': 'PIm-pf4A7oFGj0WO4Eu8oCuDtW8',
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -55,6 +66,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'oauth2_provider',
+    'cloudinary',
+    'cloudinary_storage'
 ]
 
 REST_FRAMEWORK = {

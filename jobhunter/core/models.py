@@ -53,7 +53,7 @@ class Application(BaseModel):
         REJECTED = "REJECTED", "Từ chối"
         HIRED = "HIRED", "Đã tuyển"
 
-    cv_file = CloudinaryField()
+    cv_file = CloudinaryField(resource_type='auto')
     status = models.CharField(choices=Status.choices, default=Status.PENDING, max_length=20)
     cover_letter = models.TextField(blank=True)
     recruiter_rating = models.FloatField(null=True, blank=True)
