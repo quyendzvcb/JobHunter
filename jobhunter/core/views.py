@@ -15,6 +15,7 @@ from django.db.models import Q, Count, Sum, Avg
 
 class RecruiterJobViewSet(viewsets.ModelViewSet):
     permission_classes = [perms.IsVerifiedRecruiter]
+    pagination_class = paginators.JobPagination
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update', 'retrieve']:
@@ -23,9 +24,14 @@ class RecruiterJobViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        params = self.request.query_params
+        qs = Job.objects.filter(recruiter__user=self.request.user)
+        q = params.get('q')
+        if q:
+            qs = qs.filter(Q(title__icontains=q) | Q(recruiter__company_name__icontains=q))
         if getattr(self, 'swagger_fake_view', False) or not user.is_authenticated:
             return Job.objects.none()
-        return Job.objects.filter(recruiter__user=self.request.user)
+        return qs
 
     def perform_create(self, serializer):
         serializer.save(recruiter=self.request.user.recruiter)

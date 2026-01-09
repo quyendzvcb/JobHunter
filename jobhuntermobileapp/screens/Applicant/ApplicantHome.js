@@ -48,7 +48,7 @@ const ApplicantHome = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5', marginTop: 30 },
+    container: { flex: 1, backgroundColor: '#f5f5f5' },
     modalContent: { backgroundColor: 'white', padding: 20, margin: 20, borderRadius: 10 },
 });
 

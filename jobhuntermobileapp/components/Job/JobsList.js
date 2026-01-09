@@ -1,173 +1,196 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Searchbar, Button, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import APIs, { endpoints } from '../../utils/Apis';
-import JobCard from '../Job/JobCard';
+import Apis, { authApis, endpoints } from '../../utils/Apis';
+import JobCard from './JobCard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const JobsList = ({ navigation, filters, setFilters, onOpenFilter }) => {
+const JobsList = ({
+    navigation,
+    filters,
+    setFilters,
+    onOpenFilter,
+    isRecruiter = false,
+    headerComponent = null,
+    onRefreshExternal
+}) => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [refreshing, setRefreshing] = useState(false);
     const [searchText, setSearchText] = useState('');
 
-    // Hàm gọi API tìm kiếm
-    // Quản lý số trang: bắt đầu từ 1, nếu bằng 0 nghĩa là đã hết dữ liệu (next = null)
 
-    const loadJobs = async () => {
-        if (page <= 0) return;
+    // Hàm gọi API
+    const loadJobs = async (pageNum = 1) => {
+        if (pageNum === 0) return; // Đã hết dữ liệu
+
         try {
             setLoading(true);
+            const token = await AsyncStorage.getItem('token');
+            const api = isRecruiter ? authApis(token) : Apis;
 
-            // Xây dựng URL với trang hiện tại
-            // Đảm bảo endpoints.jobs() trả về "/jobs/"
-            let url = `${endpoints.jobs()}?page=${page}`;
+            let url = isRecruiter
+                ? `${endpoints['recruiter-jobs']}?page=${pageNum}`
+                : `${endpoints.jobs()}?page=${pageNum}`;
 
-            if (searchText) {
-                url = `${url}&q=${searchText}`;
+            if (searchText) url += `&q=${searchText}`;
+
+            if (!isRecruiter && filters) {
+                if (filters.category_id) url += `&category_id=${filters.category_id}`;
+                if (filters.salary_min) url += `&salary_min=${filters.salary_min}`;
+                if (filters.ordering) url += `&ordering=${filters.ordering}`;
             }
 
-            if (filters.category_id) {
-                url = `${url}&category_id=${filters.category_id}`;
+            console.log("Calling API:", url);
+            const res = await api.get(url);
+
+            // Xử lý dữ liệu trả về
+            if (pageNum === 1) {
+                setJobs(res.data.results); // Trang 1: Gán mới hoàn toàn
+            } else {
+                setJobs(prev => [...prev, ...res.data.results]); // Trang > 1: Nối thêm
             }
 
-            if (filters.location_id && Array.isArray(filters.location_id)) {
-                filters.location_id.forEach(id => {
-                    url += `&location_id=${id}`;
-                });
-            }
-
-            if (filters.salary_min) {
-                url = `${url}&salary_min=${filters.salary_min}`;
-            }
-
-            if (filters.ordering) {
-                url = `${url}&ordering=${filters.ordering}`;
-            }
-
-            console.info("Gọi API:", url);
-
-            let res = await APIs.get(url);
-
-            // LOGIC QUAN TRỌNG: Nếu Backend báo không còn trang tiếp theo (next === null)
-            // Đặt page về 0 để hàm loadMore không thể tăng page lên nữa.
+            // Kiểm tra next page từ API (Django REST Framework trả về null nếu hết trang)
             if (res.data.next === null) {
                 setPage(0);
-            }
-
-            if (page === 1) {
-                // Trang đầu tiên: Thay thế hoàn toàn danh sách cũ.
-                setJobs(res.data.results);
-            } else if (page > 1) {
-                // Các trang tiếp theo: Nối thêm dữ liệu mới vào cuối danh sách.
-                setJobs([...jobs, ...res.data.results]);
+            } else {
+                setPage(pageNum);
             }
 
         } catch (ex) {
             if (ex.response && ex.response.status === 404) {
-                console.log("Đã hết dữ liệu hoặc trang không tồn tại, dừng phân trang.");
+                console.log("Đã hết trang (404).");
                 setPage(0);
+            } else {
+                console.error("Load Jobs Error:", ex);
             }
         } finally {
             setLoading(false);
-        }
-    }
-
-    // Refresh: Kéo xuống làm mới
-    const onRefresh = async () => {
-        setRefreshing(true);
-        setPage(1);
-        setRefreshing(false);
-    };
-
-    // LoadMore: Kéo xuống đáy
-    const loadMore = () => {
-        if (!loading && page > 0 && jobs.length > 0) {
-            setPage(page + 1);
+            setRefreshing(false);
         }
     };
 
-    // Effect: Tự động gọi API khi filters hoặc searchText thay đổi (Debounce)
+    // 1. Effect khi thay đổi Search Text (Debounce)
     useEffect(() => {
         let timer = setTimeout(() => {
-            if (page > 0) {
-                loadJobs();
-            }
+            if (page > 0)
+                setPage(1);
+            loadJobs(1);
         }, 500);
-        return () => clearTimeout(timer);
-    }, [page]);
 
+        return () => clearTimeout(timer);
+    }, [searchText]);
+
+    // 2. Effect khi thay đổi Filters (Reset về trang 1)
+    // JSON.stringify(filters) giúp so sánh nội dung object thay vì tham chiếu
     useEffect(() => {
+        if (!isRecruiter) {
+            setPage(1);
+            loadJobs(1);
+        }
+    }, [isRecruiter ? null : JSON.stringify(filters)]);
+
+    // 3. Xử lý Refresh (Kéo xuống làm mới)
+    const onRefresh = async () => {
+        setRefreshing(true);
+        if (onRefreshExternal) {
+            await onRefreshExternal();
+        }
         setPage(1);
-    }, [searchText, filters]);
+        await loadJobs(1);
+    };
+
+    // 4. Xử lý Load More (Kéo xuống đáy)
+    const loadMore = () => {
+        if (!loading && page > 0) {
+            const nextPage = page + 1;
+            loadJobs(nextPage);
+        }
+    };
 
     return (
         <View style={styles.container}>
-            {/* Header: Tìm kiếm & Công cụ */}
+            {/* Header Tìm kiếm */}
             <View style={styles.header}>
                 <Searchbar
-                    placeholder="Tìm việc, công ty..."
+                    placeholder={isRecruiter ? "Tìm trong tin của bạn..." : "Tìm việc, công ty..."}
                     onChangeText={setSearchText}
                     value={searchText}
                     style={styles.searchBar}
-                    onSubmitEditing={() => loadJobs(1)}
+                    elevation={0}
                 />
-                <View style={styles.toolsRow}>
-                    <Button
-                        mode="outlined"
-                        icon="filter-variant"
-                        onPress={onOpenFilter} // Gọi hàm mở Modal từ Home
-                        style={styles.toolBtn}
-                    >
-                        Bộ lọc
-                    </Button>
 
-                    <TouchableOpacity
-                        style={styles.sortBtn}
-                        // Cập nhật ordering thông qua setFilters được truyền từ Home
-                        onPress={() => setFilters({
-                            ...filters,
-                            ordering: filters.ordering === 'salary' ? '-created_at' : 'salary'
-                        })}
-                    >
-                        <MaterialCommunityIcons
-                            name={filters.ordering === 'salary' ? "cash" : "clock-outline"}
-                            size={20} color="#666"
-                        />
-                        <Text style={{ marginLeft: 5 }}>
-                            {filters.ordering === 'salary' ? "Lương cao" : "Mới nhất"}
-                        </Text>
-                    </TouchableOpacity>
+                {!isRecruiter && (
+                    <View style={styles.toolsRow}>
+                        <Button mode="outlined" icon="filter-variant" onPress={onOpenFilter} style={styles.toolBtn}>
+                            Bộ lọc
+                        </Button>
+                        <TouchableOpacity
+                            style={styles.sortBtn}
+                            onPress={() => setFilters && setFilters({ ...filters, ordering: filters.ordering === 'salary' ? '-created_at' : 'salary' })}
+                        >
+                            <MaterialCommunityIcons name={filters?.ordering === 'salary' ? "cash" : "clock-outline"} size={20} color="#666" />
+                            <Text style={{ marginLeft: 5 }}>{filters?.ordering === 'salary' ? "Lương cao" : "Mới nhất"}</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </View>
+
+            {/* Danh sách Job */}
+            <FlatList
+                data={jobs}
+                keyExtractor={(item) => item.id.toString()}
+                ListHeaderComponent={headerComponent}
+                renderItem={({ item }) => (
+                    <JobCard
+                        job={item}
+                        navigation={navigation}
+                        isEditable={isRecruiter}
+                        onEditPress={(job) => navigation.navigate("JobEditor", { job: job })}
+                    />
+                )}
+                // Xử lý phân trang
+                onEndReached={loadMore}
+                onEndReachedThreshold={0.5}
+
+                // Xử lý refresh
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+
+                // Loading footer
+                ListFooterComponent={loading && page > 1 ? <ActivityIndicator size="small" color="#1976D2" style={{ margin: 20 }} /> : null}
+
+                // Empty state
+                ListEmptyComponent={!loading && <Text style={styles.emptyText}>Không tìm thấy tin nào.</Text>}
+
+                contentContainerStyle={{ paddingBottom: 80 }}
+            />
+
+            {/* Loading full màn hình khi load trang 1 */}
+            {loading && page === 1 && !refreshing && (
+                <View style={styles.loadingOverlay}>
+                    <ActivityIndicator size="large" color="#1976D2" />
                 </View>
-            </View>
-
-            {/* Danh sách công việc */}
-            <View style={{ flex: 1 }}>
-                <FlatList
-                    data={jobs}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => <JobCard job={item} navigation={navigation} />}
-                    onEndReached={loadMore}
-                    onEndReachedThreshold={0.5}
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                    ListFooterComponent={loading && !refreshing && <ActivityIndicator size="large" color="#0000ff" />}
-                    ListEmptyComponent={!loading && <Text style={styles.emptyText}>Không tìm thấy công việc nào.</Text>}
-                />
-            </View>
+            )}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1 },
-    header: { padding: 10, backgroundColor: 'white', elevation: 2 },
-    searchBar: { marginBottom: 10, elevation: 0, backgroundColor: '#f0f0f0' },
-    toolsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    toolBtn: { borderColor: '#ddd' },
+    container: { flex: 1, backgroundColor: '#F5F7FA', marginTop: 30 },
+    header: { padding: 10, backgroundColor: 'white', elevation: 2},
+    searchBar: { backgroundColor: '#f0f0f0', borderRadius: 10 },
+    toolsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 },
+    toolBtn: { borderColor: '#ddd', borderRadius: 20 },
     sortBtn: { flexDirection: 'row', alignItems: 'center', padding: 8 },
-    emptyText: { textAlign: 'center', marginTop: 20, color: '#888' }
+    emptyText: { textAlign: 'center', marginTop: 20, color: '#888' },
+    loadingOverlay: {
+        position: 'absolute', top: 150, left: 0, right: 0, bottom: 0,
+        justifyContent: 'flex-start', alignItems: 'center', zIndex: 999
+    }
 });
 
 export default JobsList;

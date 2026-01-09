@@ -120,10 +120,11 @@ const App = () => {
                 <Stack.Screen name="Welcome" component={Welcome} />
                 <Stack.Screen name="Login" component={Login} />
                 <Stack.Screen name="Register" component={Register} />
+                <Stack.Screen name="Home" component={MainTabNavigator} />
               </>
             ) : (
               // Đã đăng nhập -> Vào thẳng Tab chính
-              <Stack.Screen name="MainApp" component={MainTabNavigator} />
+              <Stack.Screen name="Home" component={MainTabNavigator} />
             )}
           </Stack.Navigator>
         </NavigationContainer>
