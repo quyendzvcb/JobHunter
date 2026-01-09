@@ -1,142 +1,113 @@
-import React, { useContext, useEffect, useState } from "react";
-import { View, ScrollView, useWindowDimensions, Image, Alert, StyleSheet } from "react-native";
-import { Text, Button, Card, Chip, Divider, IconButton } from 'react-native-paper';
-import Apis, { authApis, endpoints } from "../../utils/Apis";
-import { MyUserContext } from "../../utils/contexts/MyUserContext";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useContext, useState } from 'react';
+import { View, ScrollView, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { Text, Button, Card, Avatar, Divider } from 'react-native-paper';
+import moment from 'moment';
+import 'moment/locale/vi';
+import { MyUserContext } from '../../utils/contexts/MyUserContext';
 
-const JobDetail = ({ route }) => {
-    const { jobId } = route.params;
-    const [job, setJob] = useState(null);
-    const [user] = useContext(MyUserContext);
-    const nav = useNavigation(); // Thêm hook navigation
+const JobDetail = ({ route, navigation }) => {
+    const { job } = route.params;
+    const [user] = useContext(MyUserContext); // user sẽ là null nếu chưa đăng nhập
+    const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        const load = async () => {
-            try {
-                const res = await Apis.get(endpoints['job-detail'](jobId));
-                setJob(res.data);
-            } catch (e) { console.error(e); }
+    const getLocationString = () => {
+        if (job.location_details && job.location_details.length > 0) {
+            return job.location_details.map(loc => loc.city).join(", ");
         }
-        load();
-    }, [jobId]);
+        return "Toàn quốc";
+    };
 
-    const apply = async () => {
-        // LOGIC MỚI: Nếu chưa đăng nhập -> Chuyển sang Login, dặn Login xong thì quay lại đây
-        if (!user) {
+    const handleApply = () => {
+        // 1. Kiểm tra đăng nhập
+        if (user === null) {
             Alert.alert(
                 "Yêu cầu đăng nhập",
-                "Bạn cần đăng nhập để ứng tuyển công việc này.",
+                "Bạn cần đăng nhập để thực hiện ứng tuyển công việc này.",
                 [
                     { text: "Hủy", style: "cancel" },
                     {
                         text: "Đăng nhập ngay",
-                        onPress: () => nav.navigate("Login", { next: "JobDetail", params: { jobId: jobId } })
+                        onPress: () => navigation.navigate("Login") // Đảm bảo route tên là "Login"
                     }
                 ]
             );
             return;
         }
-        try {
-            nav.navigate("ApplyJob", { jobId: job.id });
-        } catch (e) {
-            console.error("Lỗi điều hướng:", e); // Xem lỗi cụ thể ở đây
-            Alert.alert("Lỗi", "Không thể mở màn hình ứng tuyển.");
-        }
-    }
 
-    if (!job) return <Text style={{ padding: 20 }}>Đang tải...</Text>;
+        // 2. Nếu đã đăng nhập thì chuyển sang trang nộp đơn
+        navigation.navigate("ApplyJob", { jobId: job.id });
+    };
+
+    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
 
     return (
-        <View style={styles.container}>
-            <ScrollView style={styles.content}>
-                {/* 1. Header Section */}
+        <View style={{ flex: 1, backgroundColor: 'white' }}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
+                {/* Header ảnh bìa */}
                 <View style={styles.header}>
-                    <Image
-                        source={{ uri: job.recruiter_detail?.logo || 'https://via.placeholder.com/80' }}
-                        style={styles.logo}
-                    />
-                    <Text style={styles.title}>{job.title}</Text>
-                    <Text style={styles.companyName}>{job.recruiter_detail?.company_name}</Text>
-                    <Text style={styles.salary}>
-                        {job.salary}
+                    <Avatar.Image size={80} source={{ uri: job.recruiter_detail?.logo }} style={{ backgroundColor: 'white' }} />
+                </View>
+
+                <View style={styles.content}>
+                    <Text variant="headlineSmall" style={styles.title}>{job.title}</Text>
+                    <Text variant="titleMedium" style={{ color: '#555', marginBottom: 10 }}>
+                        {job.recruiter_detail?.company_name}
                     </Text>
+
+                    <Divider style={{ marginVertical: 15 }} />
+
+                    <Section title="Mô tả công việc" content={job.description} />
+                    <Section title="Yêu cầu" content={job.requirements} />
+
+                    <Section title="Thông tin chung">
+                        <InfoRow label="Địa điểm:" value={getLocationString()} />
+                        <InfoRow
+                            label="Lương:"
+                            value={job.salary || "Thỏa thuận"}
+                        />
+                        <InfoRow label="Hạn nộp:" value={moment(job.deadline).format("DD/MM/YYYY")} />
+                        <InfoRow label="Ngày đăng:" value={moment(job.created_at).fromNow()} />
+                    </Section>
                 </View>
-                <View style={styles.tagContainer}>
-                    {job.location_details?.map(loc => (
-                        <Chip key={loc.id} icon="map-marker" style={styles.chip}>{loc.city}</Chip>
-                    ))}
-                    <Chip icon="briefcase" style={styles.chip}>{job.category_detail?.name}</Chip>
-                </View>
-
-                <Divider style={styles.divider} />
-
-                {/* 3. Detailed Info Card */}
-                <Card style={styles.card}>
-                    <Card.Content>
-                        <View style={styles.infoRow}>
-                            <MaterialCommunityIcons name="calendar-clock" size={20} color="#666" />
-                            <Text style={styles.infoText}>Hạn nộp: {job.deadline}</Text>
-                        </View>
-                    </Card.Content>
-                </Card>
-
-                {/* 4. Job Content */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Mô tả công việc</Text>
-                    <Text style={styles.bodyText}>{job.description || "Đang cập nhật..."}</Text>
-                </View>
-
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Yêu cầu ứng viên</Text>
-                    <Text style={styles.bodyText}>{job.requirements || "Trao đổi trực tiếp khi phỏng vấn"}</Text>
-                </View>
-
-                <View style={{ height: 100 }} />
             </ScrollView>
-
-            {/* 5. Fixed Footer Actions */}
-            <View style={styles.footer}>
+            <View style={styles.bottomBar}>
                 <Button
                     mode="contained"
+                    icon="send"
                     style={styles.applyBtn}
-                    contentStyle={{ height: 50 }}
-                    onPress={apply}
+                    onPress={handleApply}
                 >
-                    ỨNG TUYỂN NGAY
+                    Ứng tuyển ngay
                 </Button>
             </View>
         </View>
     );
 };
 
+const Section = ({ title, content, children }) => (
+    <View style={{ marginBottom: 20 }}>
+        <Text variant="titleMedium" style={{ fontWeight: 'bold', color: '#333', marginBottom: 5 }}>{title}</Text>
+        {content ? <Text style={{ lineHeight: 22, color: '#444' }}>{content}</Text> : children}
+    </View>
+);
+
+const InfoRow = ({ label, value }) => (
+    <View style={{ flexDirection: 'row', marginBottom: 5 }}>
+        <Text style={{ fontWeight: '600', width: 100 }}>{label}</Text>
+        <Text>{value}</Text>
+    </View>
+);
+
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fff' },
-    content: { flex: 1, padding: 20 },
-    header: { alignItems: 'center', marginBottom: 20 },
-    logo: { width: 80, height: 80, borderRadius: 10, marginBottom: 15 },
-    title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center' },
-    companyName: { fontSize: 16, color: '#666', marginTop: 5 },
-    salary: { fontSize: 18, color: '#2ecc71', fontWeight: 'bold', marginTop: 10 },
-    tagContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginVertical: 10 },
-    chip: { margin: 4, backgroundColor: '#f0f0f0' },
-    divider: { marginVertical: 20 },
-    card: { backgroundColor: '#f9f9f9', elevation: 0, borderRadius: 10 },
-    infoRow: { flexDirection: 'row', alignItems: 'center' },
-    infoText: { marginLeft: 10, color: '#444' },
-    section: { marginTop: 25 },
-    sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10, color: '#333' },
-    bodyText: { fontSize: 15, lineHeight: 24, color: '#555' },
-    footer: {
-        flexDirection: 'row',
-        padding: 15,
-        borderTopWidth: 1,
-        borderTopColor: '#eee',
-        backgroundColor: '#fff',
-        alignItems: 'center'
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    header: { height: 120, backgroundColor: '#E3F2FD', justifyContent: 'center', alignItems: 'center', marginBottom: 40 },
+    content: { paddingHorizontal: 20 },
+    title: { fontWeight: 'bold', color: '#1976D2' },
+    bottomBar: {
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        backgroundColor: 'white', padding: 15, elevation: 10, borderTopWidth: 1, borderColor: '#eee'
     },
-    applyBtn: { flex: 1, marginLeft: 10, borderRadius: 8, backgroundColor: '#2563eb' }
+    applyBtn: { paddingVertical: 5, backgroundColor: '#1976D2' }
 });
+
 export default JobDetail;

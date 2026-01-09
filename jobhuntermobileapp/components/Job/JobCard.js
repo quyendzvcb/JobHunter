@@ -13,6 +13,7 @@ const JobCard = ({ job, navigation, isEditable = false, onEditPress }) => {
         }
         return "Toàn quốc";
     };
+    console.log(job);
 
     // Xử lý logic hiển thị logo an toàn hơn
     const logoUrl = job.recruiter_detail?.logo || "https://via.placeholder.com/100";
@@ -23,7 +24,7 @@ const JobCard = ({ job, navigation, isEditable = false, onEditPress }) => {
         if (isEditable && onEditPress) {
             onEditPress(job);
         } else {
-            navigation.navigate("JobDetail", { jobId: job.id });
+            navigation.navigate("JobDetail", { job: job });
         }
     };
     return (

@@ -18,7 +18,9 @@ import JobDetail from "./screens/Applicant/JobDetail";
 import Profile from "./screens/User/Profile";
 import ApplyJob from "./screens/Applicant/ApplyJob";
 import MyApplications from "./screens/Applicant/MyApplications";
-import RecruiterHome from "./screens/Recruiter/RecruiterHome"; // Import màn hình Recruiter mới
+import RecruiterHome from "./screens/Recruiter/RecruiterHome";
+import JobEditor from "./screens/Recruiter/JobEditor";
+import AddJob from "./screens/Recruiter/AddJob";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -38,7 +40,8 @@ const JobSearchStack = () => (
 const RecruiterDashboardStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="RecruiterHome" component={RecruiterHome} options={{ headerShown: false }} />
-    {/* Sau này thêm: CreateJob, EditJob ở đây */}
+    <Stack.Screen name="JobEditor" component={JobEditor} option={{ headerShown: false }} />
+    <Stack.Screen name="AddJob" component={AddJob} option={{ headerShown: false }} />
   </Stack.Navigator>
 );
 
