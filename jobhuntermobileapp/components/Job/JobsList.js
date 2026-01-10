@@ -25,7 +25,7 @@ const JobsList = ({
 
     useEffect(() => {
         if (isFocused) {
-            loadJobs(); // Hàm này sẽ gọi lại API để lấy dữ liệu mới nhất
+            loadJobs();
         }
     }, [isFocused]);
 

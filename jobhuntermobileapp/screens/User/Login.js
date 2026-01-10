@@ -8,9 +8,6 @@ import Apis, { endpoints, authApis } from "../../utils/Apis";
 import { MyUserContext } from "../../utils/contexts/MyUserContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// THÔNG TIN OAUTH2 (Thay bằng thông tin thực tế của bạn)
-
-// --- COMPONENT INPUT (Đưa ra ngoài để tránh lag - Giống Register) ---
 const RenderInput = ({ label, value, onChange, icon, secure = false, rightIcon = null, style = {} }) => (
     <View style={[LoginStyle.inputWrapper, style]}>
         <TextInput
@@ -23,7 +20,6 @@ const RenderInput = ({ label, value, onChange, icon, secure = false, rightIcon =
             outlineColor="#e5e7eb"
             activeOutlineColor="#2563eb"
             textColor="#1f2937"
-            // Icon bên trái không nhận click (pointerEvents="none")
             left={
                 <TextInput.Icon
                     icon={() => (

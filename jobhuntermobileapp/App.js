@@ -21,6 +21,7 @@ import MyApplications from "./screens/Applicant/MyApplications";
 import RecruiterHome from "./screens/Recruiter/RecruiterHome";
 import JobEditor from "./screens/Recruiter/JobEditor";
 import AddJob from "./screens/Recruiter/AddJob";
+import ApplicationDetail from "./screens/Recruiter/ApplicationDetail"
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -49,7 +50,7 @@ const RecruiterDashboardStack = () => (
 const ActivityStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="ApplicationList" component={MyApplications} options={{ headerShown: false }} />
-    <Stack.Screen name="JobDetail" component={JobDetail} options={{ title: "Chi tiết công việc" }} />
+    <Stack.Screen name="ApplicationDetail" component={ApplicationDetail} options={{ title: "Chi tiết công việc" }} />
   </Stack.Navigator>
 );
 

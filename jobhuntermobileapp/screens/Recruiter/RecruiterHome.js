@@ -1,6 +1,6 @@
 import React, { useContext, useState, useCallback, useEffect } from "react";
 import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import { Text, Avatar, Surface, DataTable, FAB, Chip } from "react-native-paper";
+import { Text, Avatar, Surface, DataTable, FAB, Chip, Card } from "react-native-paper";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -73,7 +73,7 @@ const RecruiterHome = () => {
 
                 {/* Bảng Thống Kê */}
                 <View style={styles.bodyHeader}>
-                    <Surface style={styles.tableCard} elevation={1}>
+                    <Card style={styles.tableCard} elevation={1}>
                         <View style={styles.filterToolbar}>
                             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }}>
                                 {yearsList.map(y => (
@@ -102,7 +102,7 @@ const RecruiterHome = () => {
                                 </DataTable.Row>
                             ))}
                         </DataTable>
-                    </Surface>
+                    </Card>
                     <Text style={styles.sectionTitle}>Quản lý tin tuyển dụng</Text>
                 </View>
             </View>
