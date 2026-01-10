@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Apis, { authApis, endpoints } from '../../utils/Apis';
 import JobCard from './JobCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 
 const JobsList = ({
     navigation,
@@ -20,6 +21,13 @@ const JobsList = ({
     const [page, setPage] = useState(1);
     const [refreshing, setRefreshing] = useState(false);
     const [searchText, setSearchText] = useState('');
+    const isFocused = useIsFocused();
+
+    useEffect(() => {
+        if (isFocused) {
+            loadJobs(); // Hàm này sẽ gọi lại API để lấy dữ liệu mới nhất
+        }
+    }, [isFocused]);
 
 
     // Hàm gọi API
@@ -149,7 +157,7 @@ const JobsList = ({
                         job={item}
                         navigation={navigation}
                         isEditable={isRecruiter}
-                        onEditPress={(job) => navigation.navigate("JobEditor", { job: job })}
+                        onEditPress={(job) => navigation.navigate("JobEditor", { jobId: job.id })}
                     />
                 )}
                 // Xử lý phân trang
@@ -181,7 +189,7 @@ const JobsList = ({
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F5F7FA', marginTop: 30 },
-    header: { padding: 10, backgroundColor: 'white', elevation: 2},
+    header: { padding: 10, backgroundColor: 'white', elevation: 2 },
     searchBar: { backgroundColor: '#f0f0f0', borderRadius: 10 },
     toolsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 },
     toolBtn: { borderColor: '#ddd', borderRadius: 20 },

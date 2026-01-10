@@ -1,12 +1,14 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { Text, Button, Card, Avatar, Divider } from 'react-native-paper';
 import moment from 'moment';
 import 'moment/locale/vi';
 import { MyUserContext } from '../../utils/contexts/MyUserContext';
+import Apis, { endpoints } from '../../utils/Apis';
 
 const JobDetail = ({ route, navigation }) => {
-    const { job } = route.params;
+    const { job_id } = route.params;
+    const [job, setJob] = useState([])
     const [user] = useContext(MyUserContext); // user sẽ là null nếu chưa đăng nhập
     const [loading, setLoading] = useState(false);
 
@@ -16,6 +18,20 @@ const JobDetail = ({ route, navigation }) => {
         }
         return "Toàn quốc";
     };
+
+    useEffect(() => {
+        const loadJob = async () => {
+            try {
+                const res = await Apis.get(endpoints['job-detail'](job_id));
+                setJob(res.data)
+                console.log(res.data);
+            } catch (ex) {
+                console.log(ex);
+            }
+        };
+        loadJob();
+    }, [])
+
 
     const handleApply = () => {
         // 1. Kiểm tra đăng nhập
@@ -57,6 +73,7 @@ const JobDetail = ({ route, navigation }) => {
                     <Divider style={{ marginVertical: 15 }} />
 
                     <Section title="Mô tả công việc" content={job.description} />
+                    <Section title="Lợi ích" content={job.benefits} />
                     <Section title="Yêu cầu" content={job.requirements} />
 
                     <Section title="Thông tin chung">
@@ -66,7 +83,7 @@ const JobDetail = ({ route, navigation }) => {
                             value={job.salary || "Thỏa thuận"}
                         />
                         <InfoRow label="Hạn nộp:" value={moment(job.deadline).format("DD/MM/YYYY")} />
-                        <InfoRow label="Ngày đăng:" value={moment(job.created_at).fromNow()} />
+                        <InfoRow label="Ngày đăng:" value={moment(job.created_at, "DD-MM-YYYY HH:mm:ss").fromNow()} />
                     </Section>
                 </View>
             </ScrollView>

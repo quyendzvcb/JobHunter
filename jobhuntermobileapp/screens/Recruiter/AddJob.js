@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Alert } from 'react-native';
-import JobForm from '../../components/Job/JobForm'; // Đường dẫn import tùy folder
+import JobForm from '../../components/Job/JobForm';
 import { authApis, endpoints } from '../../utils/Apis';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

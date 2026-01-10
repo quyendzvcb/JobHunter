@@ -1,20 +1,32 @@
 import React, { useState } from 'react';
 import { Alert } from 'react-native';
 import JobForm from '../../components/Job/JobForm';
-import { authApis, endpoints } from '../../utils/Apis';
+import Apis, { authApis, endpoints } from '../../utils/Apis';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect } from 'react';
 
 const JobEditor = ({ route, navigation }) => {
-    const { job } = route.params; // Lấy job từ màn hình trước truyền sang
+    const { jobId } = route.params;
+    const [job, setJob] = useState();
     const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+        const loadJob = async () => {
+            try {
+                const res = await Apis.get(endpoints['job-detail'](jobId));
+                setJob(res.data)
+                console.log(res.data);
+            } catch (ex) {
+                console.log(ex);
+            }
+        };
+        loadJob();
+    }, [])
     const handleUpdate = async (updatedData) => {
         try {
             setLoading(true);
             const token = await AsyncStorage.getItem('token');
-            // Gọi API PATCH vào endpoint detail của job (thường là /jobs/{id}/)
-            // Lưu ý: Endpoint này tùy thuộc vào backend của bạn định nghĩa
-            const res = await authApis(token).patch(endpoints['job-detail'](job.id), updatedData);
+            const res = await authApis(token).patch(endpoints['recruiter-job-detail'](job.id), updatedData);
 
             Alert.alert("Thành công", "Cập nhật tin thành công!", [
                 { text: "OK", onPress: () => navigation.goBack() }

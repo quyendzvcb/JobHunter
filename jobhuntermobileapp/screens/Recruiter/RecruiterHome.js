@@ -7,7 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { MyUserContext } from "../../utils/contexts/MyUserContext";
 import { authApis, endpoints } from "../../utils/Apis";
-import JobsList from "../../components/Job/JobsList"; // Import component chung
+import JobsList from "../../components/Job/JobsList";
 
 const RecruiterHome = () => {
     const [user] = useContext(MyUserContext);
@@ -42,7 +42,10 @@ const RecruiterHome = () => {
         } catch (e) { console.error(e); }
     }, [year, period]);
 
-    useEffect(() => { if (isFocused) loadStats(); }, [isFocused, loadStats]);
+    useEffect(() => {
+        if (isFocused)
+            loadStats();
+    }, [isFocused, loadStats]);
 
     // --- Định nghĩa Header (Thống kê) để truyền vào JobsList ---
     const renderStatsHeader = () => {
@@ -131,7 +134,7 @@ const StatCard = ({ icon, value, label, color }) => (
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F5F7FA' },
-    header: { backgroundColor: '#1976D2', padding: 20, paddingBottom: 60},
+    header: { backgroundColor: '#1976D2', padding: 20, paddingBottom: 60 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
     welcomeLabel: { color: '#BBDEFB', fontSize: 14 },
     userName: { color: 'white', fontSize: 20, fontWeight: 'bold' },

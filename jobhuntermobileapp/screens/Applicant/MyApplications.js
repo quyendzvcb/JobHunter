@@ -100,6 +100,7 @@ const MyApplications = () => {
         if (url) Linking.openURL(url).catch(err => Alert.alert("Lỗi", "Không thể mở file này"));
         else Alert.alert("Thông báo", "Không tìm thấy file CV");
     };
+    console.log(items)
 
     // ITEM NHÀ TUYỂN DỤNG
     const renderRecruiterItem = ({ item }) => (
@@ -115,7 +116,7 @@ const MyApplications = () => {
                             Vị trí: <Text style={{ fontWeight: 'bold', color: '#1976D2' }}>{item.job_detail?.title}</Text>
                         </Text>
                         <Text variant="bodySmall" style={{ color: '#888', marginTop: 2 }}>
-                            <MaterialCommunityIcons name="clock-outline" size={12} /> {moment(item.created_at).fromNow()}
+                            <MaterialCommunityIcons name="clock-outline" size={12} /> {moment(item.created_at, "DD-MM-YYYY HH:mm:ss").fromNow()}
                         </Text>
                     </View>
                 </View>
@@ -135,7 +136,7 @@ const MyApplications = () => {
 
     // ITEM ỨNG VIÊN
     const renderApplicantItem = ({ item }) => (
-        <TouchableOpacity activeOpacity={0.9} onPress={() => nav.navigate("JobDetail", { jobId: item.job_detail?.id || item.job?.id })}>
+        <TouchableOpacity activeOpacity={0.9}>
             <Card style={styles.card}>
                 <Card.Content>
                     <View style={styles.row}>
@@ -154,7 +155,7 @@ const MyApplications = () => {
                             </View>
                         </View>
                         <View style={{ alignItems: 'flex-end' }}>
-                            <Text style={{ fontSize: 11, color: '#aaa' }}>{moment(item.created_at).format("DD/MM")}</Text>
+                            <Text style={{ fontSize: 11, color: '#aaa' }}>{moment(item.created_at, "DD-MM-YYYY HH:mm:ss").fromNow()}</Text>
                         </View>
                     </View>
                 </Card.Content>

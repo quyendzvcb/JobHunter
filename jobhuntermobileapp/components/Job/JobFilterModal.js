@@ -43,7 +43,6 @@ const JobFilterModal = ({ currentFilters, onApply }) => {
             setSelectedLocs([...selectedLocs, id]);
         }
     };
-    console.log(selectedLocs);
 
     const handleReset = () => {
         setSelectedCate(null);
