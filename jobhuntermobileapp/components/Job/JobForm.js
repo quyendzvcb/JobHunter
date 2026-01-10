@@ -3,6 +3,8 @@ import { View, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-nat
 import { TextInput, Button, Text, Portal, Modal, Checkbox, Divider, ActivityIndicator } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Apis, { endpoints } from '../../utils/Apis';
+import UnifiedTextInput from '../../components/Common/UnifiedTextInput';
+
 
 const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
     // 1. State chỉ giữ những gì cần thiết cho logic giao diện
@@ -109,96 +111,80 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
                 {initialValues ? "CẬP NHẬT TIN TUYỂN DỤNG" : "ĐĂNG TIN TUYỂN DỤNG MỚI"}
             </Text>
 
-            <TextInput
+            <UnifiedTextInput
                 label="Tiêu đề công việc *"
                 value={job.title}
-                onChangeText={(t) => handleChange('title', t)}
-                mode="outlined"
-                style={styles.input}
+                onChange={(t) => handleChange('title', t)}
+                wrapperStyle={styles.input}
             />
 
-            <TouchableOpacity onPress={() => setVisibleCat(true)}>
-                <View pointerEvents="none">
-                    <TextInput
-                        label="Ngành nghề *"
-                        value={getSelectedLabel(categories, job.category_id)}
-                        mode="outlined"
-                        style={styles.input}
-                        right={<TextInput.Icon icon="chevron-down" />}
-                    />
-                </View>
-            </TouchableOpacity>
+            <UnifiedTextInput
+                label="Ngành nghề *"
+                value={getSelectedLabel(categories, job.category_id)}
+                rightIcon={<TextInput.Icon icon="chevron-down" />}
+                onPress={() => setVisibleCat(true)}  // ← Dòng quan trọng
+                wrapperStyle={styles.input}
+            />
 
-            <TouchableOpacity onPress={() => setVisibleLoc(true)}>
-                <View pointerEvents="none">
-                    <TextInput
-                        label="Địa điểm làm việc (Chọn nhiều) *"
-                        value={getSelectedLabel(locations, job.location_ids, true)}
-                        mode="outlined"
-                        multiline={job.location_ids.length > 1}
-                        style={styles.input}
-                        right={<TextInput.Icon icon="map-marker" />}
-                    />
-                </View>
-            </TouchableOpacity>
-
+            <UnifiedTextInput
+                label="Địa điểm làm việc (Chọn nhiều) *"
+                value={getSelectedLabel(locations, job.location_ids, true)}
+                rightIcon={<TextInput.Icon icon="chevron-down" />}
+                multiline={job.location_ids.length > 1}
+                onPress={() => setVisibleLoc(true)}  // ← Dòng quan trọng
+                wrapperStyle={styles.input}
+            />
             <View style={styles.row}>
-                <TextInput
+                <UnifiedTextInput
                     label="Lương tối thiểu"
                     value={job.salary_min}
-                    onChangeText={(t) => handleChange('salary_min', t)}
+                    onChange={(t) => handleChange('salary_min', t)}
                     keyboardType="numeric"
-                    mode="outlined"
-                    style={[styles.input, styles.halfInput]}
+                    wrapperStyle={[styles.input, styles.halfInput]}
                 />
-                <TextInput
+                <UnifiedTextInput
                     label="Lương tối đa"
                     value={job.salary_max}
-                    onChangeText={(t) => handleChange('salary_max', t)}
+                    onChange={(t) => handleChange('salary_max', t)}
                     keyboardType="numeric"
-                    mode="outlined"
-                    style={[styles.input, styles.halfInput]}
+                    wrapperStyle={[styles.input, styles.halfInput]}
                 />
             </View>
 
-            <TextInput
+            <UnifiedTextInput
                 label="Hạn nộp"
                 value={job.deadline}
-                onChangeText={(t) => handleChange('deadline', t)}
-                mode="outlined"
+                onChange={(t) => handleChange('deadline', t)}
+                icon="calendar"
                 placeholder="YYYY-MM-DD"
-                style={styles.input}
-                right={<TextInput.Icon icon="calendar" />}
+                wrapperStyle={styles.input}
             />
 
-            <TextInput
+            <UnifiedTextInput
                 label="Mô tả công việc *"
                 value={job.description}
-                onChangeText={(t) => handleChange('description', t)}
-                mode="outlined"
-                multiline
+                onChange={(t) => handleChange('description', t)}
+                multiline={true}
                 numberOfLines={4}
-                style={styles.input}
+                wrapperStyle={styles.input}
             />
 
-            <TextInput
+            <UnifiedTextInput
                 label="Quyền lợi ứng viên"
                 value={job.benefits}
-                onChangeText={(t) => handleChange('benefits', t)}
-                mode="outlined"
-                multiline
+                onChange={(t) => handleChange('benefits', t)}
+                multiline={true}
                 numberOfLines={3}
-                style={styles.input}
+                wrapperStyle={styles.input}
             />
 
-            <TextInput
+            <UnifiedTextInput
                 label="Yêu cầu công việc"
                 value={job.requirements}
-                onChangeText={(t) => handleChange('requirements', t)}
-                mode="outlined"
-                multiline
+                onChange={(t) => handleChange('requirements', t)}
+                multiline={true}
                 numberOfLines={3}
-                style={styles.input}
+                wrapperStyle={styles.input}
             />
 
             <Button

@@ -7,6 +7,7 @@ import { MyUserContext } from "../../utils/contexts/MyUserContext";
 import { authApis, endpoints } from "../../utils/Apis";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { uploadToCloudinary } from '../../utils/CloudinaryUpload';
+import UnifiedTextInput from '../../components/Common/UnifiedTextInput';
 
 const ApplyJob = ({ route, navigation }) => {
     const { jobId } = route.params;
@@ -128,42 +129,37 @@ const ApplyJob = ({ route, navigation }) => {
 
             {/* --- Section 2: Thông tin cá nhân (GIỮ NGUYÊN) --- */}
             <Text style={styles.sectionTitle}>Thông Tin Cá Nhân</Text>
-            <TextInput
+            <UnifiedTextInput
                 label="Họ và tên *"
                 value={fullName}
-                onChangeText={setFullName}
-                mode="outlined"
-                outlineColor="#2563eb"
-                activeOutlineColor="#2563eb"
-                style={styles.input}
+                onChange={setFullName}
+                icon="account"
+                wrapperStyle={styles.input}
             />
-            <TextInput
+            <UnifiedTextInput
                 label="Số điện thoại *"
                 value={phone}
-                onChangeText={setPhone}
-                mode="outlined"
-                outlineColor="#2563eb"
-                activeOutlineColor="#2563eb"
+                onChange={setPhone}
+                icon="phone"
                 keyboardType="phone-pad"
-                style={styles.input}
+                wrapperStyle={styles.input}
             />
 
             {/* --- Section 3: Cover Letter (GIỮ NGUYÊN) --- */}
             <Text style={styles.sectionTitle}>Thư giới thiệu <Text style={{ color: 'gray', fontSize: 14 }}>(Tùy chọn)</Text></Text>
             <Text style={styles.subHint}>Hãy cho nhà tuyển dụng biết tại sao bạn phù hợp.</Text>
-            <TextInput
-                placeholder="Viết ngắn gọn về kinh nghiệm và kỹ năng của bạn..."
+            <UnifiedTextInput
+                label="Thư giới thiệu"
                 value={coverLetter}
-                onChangeText={setCoverLetter}
-                mode="outlined"
-                multiline
+                onChange={setCoverLetter}
+                placeholder="Viết ngắn gọn về kinh nghiệm..."
+                icon="file-document"
+                multiline={true}
                 numberOfLines={5}
-                outlineColor="#e5e7eb"
-                activeOutlineColor="#2563eb"
-                style={styles.textArea}
                 maxLength={500}
+                helperText={`${500 - coverLetter.length} ký tự còn lại`}
+                wrapperStyle={styles.input}
             />
-            <Text style={styles.charCount}>{500 - coverLetter.length} ký tự còn lại</Text>
 
             {/* --- Submit Button (GIỮ NGUYÊN) --- */}
             <Button
