@@ -22,6 +22,8 @@ import RecruiterHome from "./screens/Recruiter/RecruiterHome";
 import JobEditor from "./screens/Recruiter/JobEditor";
 import AddJob from "./screens/Recruiter/AddJob";
 import ApplicationDetail from "./screens/Recruiter/ApplicationDetail"
+import PackageList from "./screens/Payment/PackageList"
+import PaymentHistory from "./screens/Payment/PaymentHistory"
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -58,6 +60,8 @@ const ActivityStack = () => (
 const ProfileStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
+    <Stack.Screen name="PackageList" component={PackageList} options={{ title: 'Chọn gói dịch vụ' }} />
+    <Stack.Screen name="PaymentHistory" component={PaymentHistory} options={{ title: 'Lịch sử giao dịch' }} />
   </Stack.Navigator>
 );
 

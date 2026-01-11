@@ -55,12 +55,6 @@ const ApplicationDetail = ({ route, navigation }) => {
         }
     };
 
-    const callUser = () => {
-        const phone = applicant.phone || application.applicant_detail?.phone;
-        if (phone) Linking.openURL(`tel:${phone}`);
-        else Alert.alert("Thông báo", "Không có số điện thoại");
-    };
-
     return (
         <ScrollView style={styles.container}>
             {/* --- Header --- */}
@@ -123,10 +117,6 @@ const ApplicationDetail = ({ route, navigation }) => {
                         <View style={styles.radioRow}>
                             <RadioButton value="ACCEPTED" color="green" />
                             <Text style={{ color: 'green', fontWeight: 'bold' }}>Chấp nhận</Text>
-                        </View>
-                        <View style={styles.radioRow}>
-                            <RadioButton value="HIRED" color="green" />
-                            <Text style={{ color: 'green', fontWeight: 'bold' }}>Đã tuyển</Text>
                         </View>
                         <View style={styles.radioRow}>
                             <RadioButton value="REJECTED" color="red" />

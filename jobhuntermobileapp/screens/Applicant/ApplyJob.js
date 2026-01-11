@@ -32,8 +32,6 @@ const ApplyJob = ({ route, navigation }) => {
         }
     };
 
-    console.log(newFile)
-
     const handleSendApplication = async () => {
         if (!fullName || !phone) {
             Alert.alert("Thiếu thông tin", "Vui lòng điền đầy đủ Họ tên và Số điện thoại.");

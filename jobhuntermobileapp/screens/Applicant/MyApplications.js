@@ -66,7 +66,6 @@ const MyApplications = () => {
 
     // --- RENDER ITEM RECRUITER (ĐÃ SỬA: Hiển thị Tên + SĐT, bấm vào chuyển trang) ---
     const renderRecruiterItem = ({ item }) => {
-        console.log(item);
         const applicantName = `${item.applicant_detail?.full_name}`;
         const phone = item.applicant_detail?.phone_number || "Chưa cập nhật SĐT";
 

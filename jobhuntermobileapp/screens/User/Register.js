@@ -1,35 +1,12 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image, Alert } from "react-native";
-import { TextInput, Button, HelperText, RadioButton } from "react-native-paper";
+import { TextInput, Button, RadioButton } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import RegisterStyle from "./RegisterStyle";
 import Apis, { endpoints } from "../../utils/Apis";
-
-// --- COMPONENT INPUT ---
-const RenderInput = ({ label, value, onChange, secure = false, rightIcon = null, keyboardType = 'default', style = {}, errorText = null }) => (
-    <View style={[RegisterStyle.inputWrapper, style]}>
-        <TextInput
-            mode="outlined"
-            label={label}
-            value={value}
-            onChangeText={onChange}
-            secureTextEntry={secure}
-            keyboardType={keyboardType}
-            style={RegisterStyle.input}
-            outlineColor={errorText ? "#B00020" : "#e5e7eb"}
-            activeOutlineColor={errorText ? "#B00020" : "#2563eb"}
-            textColor="#1f2937"
-            right={rightIcon}
-        />
-        {errorText && (
-            <HelperText type="error" visible={true} style={{ paddingLeft: 0, fontSize: 12 }}>
-                {errorText}
-            </HelperText>
-        )}
-    </View>
-);
+import UnifiedTextInput from "../../components/Common/UnifiedTextInput";
 
 const Register = () => {
     const nav = useNavigation();
@@ -38,21 +15,24 @@ const Register = () => {
     const [showPass, setShowPass] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
-    // --- KHÔI PHỤC STATE LƯU LỖI CHI TIẾT ---
+    // ✅ State tách biệt cho mỗi field
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirm, setConfirm] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [address, setAddress] = useState("");
+    const [dob, setDob] = useState("");
+    const [gender, setGender] = useState("MALE");
+    const [companyName, setCompanyName] = useState("");
+    const [companyLocation, setCompanyLocation] = useState("");
+    const [webURL, setWebURL] = useState("");
+    const [avatar, setAvatar] = useState(null);
+
+    // ✅ Error state tách biệt
     const [errors, setErrors] = useState({});
-
-    const [user, setUser] = useState({
-        first_name: "", last_name: "", email: "", username: "", password: "", confirm: "",
-        phone_number: "", address: "", gender: "MALE", dob: "",
-        company_name: "", company_location: "", webURL: ""
-    });
-
-    const updateState = (field, value) => {
-        setUser(current => ({ ...current, [field]: value }));
-        if (errors[field]) {
-            setErrors(e => ({ ...e, [field]: null }));
-        }
-    };
 
     const pickImage = async () => {
         let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -64,24 +44,17 @@ const Register = () => {
                 quality: 1,
             });
             if (!result.canceled) {
-                // Lưu vào user.avatar thay vì state riêng
-                updateState("avatar", result.assets[0]);
+                setAvatar(result.assets[0]);
             }
         }
     }
 
     const validate = () => {
-        let isValid = true;
-        let newErrors = {};
-
-        if (!user.password || user.password !== user.confirm) {
-            newErrors.confirm = "Mật khẩu xác nhận không khớp!";
-            isValid = false;
+        if (!password || password !== confirm) {
+            setErrors({ confirm: "Mật khẩu xác nhận không khớp!" });
+            return false;
         }
-
-        // Cập nhật lỗi để hiển thị đỏ
-        setErrors(newErrors);
-        return isValid;
+        return true;
     }
 
     const register = async () => {
@@ -90,43 +63,40 @@ const Register = () => {
             try {
                 let form = new FormData();
 
-                // 1. Append các trường cơ bản
-                const commonFields = ['first_name', 'last_name', 'username', 'password', 'email'];
-                commonFields.forEach(field => {
-                    if (user[field]) form.append(field, user[field]);
-                });
+                // Append các trường cơ bản
+                form.append('first_name', firstName);
+                form.append('last_name', lastName);
+                form.append('username', username);
+                form.append('password', password);
+                form.append('email', email);
 
-                // 2. Xử lý ảnh (Dùng user.avatar)
-                if (user.avatar) {
+                // Xử lý ảnh
+                if (avatar) {
                     const imageKey = role === 'RECRUITER' ? 'logo' : 'avatar';
                     form.append(imageKey, {
-                        uri: user.avatar.uri,
-                        name: user.avatar.fileName || 'image.jpg',
+                        uri: avatar.uri,
+                        name: avatar.fileName || 'image.jpg',
                         type: 'image/jpeg'
                     });
                 }
-                // 3. Chọn URL và append trường riêng biệt
+
+                // Chọn endpoint
                 let url = "";
                 if (role === "APPLICANT") {
                     url = endpoints['register-applicant'];
-                    form.append('gender', user.gender);
-                    form.append('address', user.address);
-                    form.append('phone_number', user.phone_number);
-                    if (user.dob) form.append('dob', user.dob);
+                    form.append('gender', gender);
+                    form.append('address', address);
+                    form.append('phone_number', phoneNumber);
+                    if (dob) form.append('dob', dob);
                 } else {
                     url = endpoints['register-recruiter'];
-                    form.append('company_name', user.company_name);
-                    form.append('company_location', user.company_location);
-                    form.append('webURL', user.webURL);
+                    form.append('company_name', companyName);
+                    form.append('company_location', companyLocation);
+                    form.append('webURL', webURL);
                 }
 
-                console.info("Registering to URL:", url);
-
-                // 4. Gọi API
                 let res = await Apis.post(url, form, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
+                    headers: { 'Content-Type': 'multipart/form-data' }
                 });
 
                 if (res.status === 201) {
@@ -136,7 +106,6 @@ const Register = () => {
             } catch (ex) {
                 console.error(ex);
                 if (ex.response && ex.response.data) {
-                    // Hiển thị lỗi từ server lên các ô input tương ứng
                     const serverErrors = ex.response.data;
                     let formattedErrors = {};
                     for (let key in serverErrors) {
@@ -156,7 +125,6 @@ const Register = () => {
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={RegisterStyle.container}>
             <ScrollView contentContainerStyle={RegisterStyle.scrollContent} showsVerticalScrollIndicator={false}>
                 <View style={RegisterStyle.content}>
-
                     <View style={RegisterStyle.header}>
                         <Text style={RegisterStyle.title}>ĐĂNG KÝ</Text>
                         <Text style={RegisterStyle.subtitle}>Tạo tài khoản mới</Text>
@@ -175,36 +143,86 @@ const Register = () => {
                         </TouchableOpacity>
                     </View>
 
-                    {/* --- SỬA LỖI AVATAR TẠI ĐÂY (dùng user.avatar) --- */}
                     <TouchableOpacity onPress={pickImage} style={RegisterStyle.avatarContainer}>
-                        <View style={[RegisterStyle.avatarWrapper, user.avatar && RegisterStyle.avatarWrapperSelected]}>
-                            {user.avatar ? <Image source={{ uri: user.avatar.uri }} style={{ width: 100, height: 100 }} /> :
+                        <View style={[RegisterStyle.avatarWrapper, avatar && RegisterStyle.avatarWrapperSelected]}>
+                            {avatar ? <Image source={{ uri: avatar.uri }} style={{ width: 100, height: 100 }} /> :
                                 <MaterialCommunityIcons name={role === 'RECRUITER' ? "domain" : "camera-plus"} size={40} color="#2563eb" />}
                         </View>
                         <Text style={RegisterStyle.avatarLabel}>{role === 'RECRUITER' ? "Tải lên Logo" : "Tải lên Ảnh đại diện"}</Text>
                     </TouchableOpacity>
 
                     <View style={RegisterStyle.form}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                            <RenderInput label="Họ" value={user.last_name} onChange={t => updateState('last_name', t)}
-                                style={RegisterStyle.halfInput} errorText={errors.last_name} />
-                            <RenderInput label="Tên" value={user.first_name} onChange={t => updateState('first_name', t)}
-                                style={RegisterStyle.halfInput} errorText={errors.first_name} />
-                        </View>
+                        {/* ✅ Dùng onChangeText với setter trực tiếp */}
+                        <UnifiedTextInput
+                            label="Họ"
+                            value={lastName}
+                            onChangeText={setLastName}
+                            icon="alphabetical"
+                            errorText={errors.last_name}
+                            wrapperStyle={RegisterStyle.inputWrapper}
+                        />
 
-                        <RenderInput label="Email" value={user.email} onChange={t => updateState('email', t)}
-                            errorText={errors.email} />
+                        <UnifiedTextInput
+                            label="Tên"
+                            value={firstName}
+                            onChangeText={setFirstName}
+                            icon="alphabetical"
+                            errorText={errors.first_name}
+                            wrapperStyle={RegisterStyle.inputWrapper}
+                        />
 
-                        <RenderInput label="Tên đăng nhập" value={user.username} onChange={t => updateState('username', t)}
-                            errorText={errors.username} />
+                        <UnifiedTextInput
+                            label="Email"
+                            value={email}
+                            onChangeText={setEmail}
+                            icon="email"
+                            keyboardType="email-address"
+                            errorText={errors.email}
+                            wrapperStyle={RegisterStyle.inputWrapper}
+                        />
 
-                        <RenderInput label="Mật khẩu" value={user.password} onChange={t => updateState('password', t)}
-                            secure={!showPass} errorText={errors.password}
-                            rightIcon={<TextInput.Icon icon={showPass ? "eye-off" : "eye"} color="#2563eb" onPress={() => setShowPass(!showPass)} />} />
+                        <UnifiedTextInput
+                            label="Tên đăng nhập"
+                            value={username}
+                            onChangeText={setUsername}
+                            icon="account"
+                            errorText={errors.username}
+                            wrapperStyle={RegisterStyle.inputWrapper}
+                        />
 
-                        <RenderInput label="Xác nhận mật khẩu" value={user.confirm} onChange={t => updateState('confirm', t)}
-                            secure={!showConfirm} errorText={errors.confirm}
-                            rightIcon={<TextInput.Icon icon={showConfirm ? "eye-off" : "eye"} color="#2563eb" onPress={() => setShowConfirm(!showConfirm)} />} />
+                        <UnifiedTextInput
+                            label="Mật khẩu"
+                            value={password}
+                            onChangeText={setPassword}
+                            icon="lock"
+                            secure={!showPass}
+                            errorText={errors.password}
+                            rightIcon={
+                                <TextInput.Icon
+                                    icon={showPass ? "eye-off" : "eye"}
+                                    color="#2563eb"
+                                    onPress={() => setShowPass(!showPass)}
+                                />
+                            }
+                            wrapperStyle={RegisterStyle.inputWrapper}
+                        />
+
+                        <UnifiedTextInput
+                            label="Xác nhận mật khẩu"
+                            value={confirm}
+                            onChangeText={setConfirm}
+                            icon="lock-check"
+                            secure={!showConfirm}
+                            errorText={errors.confirm}
+                            rightIcon={
+                                <TextInput.Icon
+                                    icon={showConfirm ? "eye-off" : "eye"}
+                                    color="#2563eb"
+                                    onPress={() => setShowConfirm(!showConfirm)}
+                                />
+                            }
+                            wrapperStyle={RegisterStyle.inputWrapper}
+                        />
 
                         <Text style={RegisterStyle.sectionTitle}>
                             {role === 'APPLICANT' ? "Thông tin cá nhân" : "Thông tin doanh nghiệp"}
@@ -212,18 +230,37 @@ const Register = () => {
 
                         {role === 'APPLICANT' ? (
                             <>
-                                <RenderInput label="Số điện thoại" value={user.phone_number} onChange={t => updateState('phone_number', t)}
-                                    keyboardType="phone-pad" errorText={errors.phone_number} />
+                                <UnifiedTextInput
+                                    label="Số điện thoại"
+                                    value={phoneNumber}
+                                    onChangeText={setPhoneNumber}
+                                    icon="phone"
+                                    keyboardType="phone-pad"
+                                    errorText={errors.phone_number}
+                                    wrapperStyle={RegisterStyle.inputWrapper}
+                                />
 
-                                <RenderInput label="Địa chỉ" value={user.address} onChange={t => updateState('address', t)}
-                                    errorText={errors.address} />
+                                <UnifiedTextInput
+                                    label="Địa chỉ"
+                                    value={address}
+                                    onChangeText={setAddress}
+                                    icon="map-marker"
+                                    errorText={errors.address}
+                                    wrapperStyle={RegisterStyle.inputWrapper}
+                                />
 
-                                <RenderInput label="Ngày sinh(YYYY-MM-DD)" value={user.dob} onChange={t => updateState('dob', t)}
-                                    errorText={errors.dob} />
+                                <UnifiedTextInput
+                                    label="Ngày sinh (YYYY-MM-DD)"
+                                    value={dob}
+                                    onChangeText={setDob}
+                                    icon="calendar"
+                                    errorText={errors.dob}
+                                    wrapperStyle={RegisterStyle.inputWrapper}
+                                />
 
                                 <View style={[RegisterStyle.inputWrapper, { marginBottom: 10 }]}>
                                     <Text style={{ color: '#4b5563', marginBottom: 8, fontWeight: '600' }}>Giới tính:</Text>
-                                    <RadioButton.Group onValueChange={v => updateState('gender', v)} value={user.gender}>
+                                    <RadioButton.Group onValueChange={setGender} value={gender}>
                                         <View style={RegisterStyle.row}>
                                             <View style={[RegisterStyle.row, { marginRight: 20 }]}>
                                                 <RadioButton value="MALE" color="#2563eb" />
@@ -243,14 +280,33 @@ const Register = () => {
                             </>
                         ) : (
                             <>
-                                <RenderInput label="Tên công ty" value={user.company_name} onChange={t => updateState('company_name', t)}
-                                    errorText={errors.company_name} />
+                                <UnifiedTextInput
+                                    label="Tên công ty"
+                                    value={companyName}
+                                    onChangeText={setCompanyName}
+                                    icon="domain"
+                                    errorText={errors.company_name}
+                                    wrapperStyle={RegisterStyle.inputWrapper}
+                                />
 
-                                <RenderInput label="Địa chỉ công ty" value={user.company_location} onChange={t => updateState('company_location', t)}
-                                    errorText={errors.company_location} />
+                                <UnifiedTextInput
+                                    label="Địa chỉ công ty"
+                                    value={companyLocation}
+                                    onChangeText={setCompanyLocation}
+                                    icon="map-marker"
+                                    errorText={errors.company_location}
+                                    wrapperStyle={RegisterStyle.inputWrapper}
+                                />
 
-                                <RenderInput label="Website" value={user.webURL} onChange={t => updateState('webURL', t)}
-                                    errorText={errors.webURL} />
+                                <UnifiedTextInput
+                                    label="Website"
+                                    value={webURL}
+                                    onChangeText={setWebURL}
+                                    icon="link"
+                                    keyboardType="url"
+                                    errorText={errors.webURL}
+                                    wrapperStyle={RegisterStyle.inputWrapper}
+                                />
                             </>
                         )}
 
@@ -261,7 +317,7 @@ const Register = () => {
                             disabled={loading}
                             style={RegisterStyle.registerButton}
                             contentStyle={{ height: 55 }}
-                            labelStyle={RegisterStyle.registerButtonText}
+                            labelStyle={RegisterStyle.registerButtonLabel}
                         >
                             ĐĂNG KÝ NGAY
                         </Button>
