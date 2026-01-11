@@ -13,20 +13,19 @@ export const endpoints = {
     'register-applicant': '/users/register/applicant/',
     'register-recruiter': '/users/register/recruiter/',
 
-    // Application
     'apply-job': '/applications/apply/',
     'my-applications': '/applications/',
     'evaluate-application': (appId) => `/applications/${appId}/evaluate/`,
 
-    // Recruiter specific (Thêm mới)
     'recruiter-jobs': '/recruiter/jobs/',
     'recruiter-job-detail': (jobId) => `/recruiter/jobs/${jobId}/`,
     'recruiter-stats': '/recruiter/jobs/stats/',
 
-    // Payment (Nếu làm chức năng thanh toán)
     'payment-history': '/payment/history/',
-    'create-payment': '/payment/create-transaction/',
+    'create-payment': '/payment/momo-pay/',
+
     'packages': '/packages/',
+    'package-detail': (pkgId) => `/packages/${pkgId}`
 };
 
 export const authApis = (token) => {

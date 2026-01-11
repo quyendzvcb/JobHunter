@@ -24,6 +24,7 @@ import AddJob from "./screens/Recruiter/AddJob";
 import ApplicationDetail from "./screens/Recruiter/ApplicationDetail"
 import PackageList from "./screens/Payment/PackageList"
 import PaymentHistory from "./screens/Payment/PaymentHistory"
+import CreatePayment from './screens/Payment/CreatePayment';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -62,6 +63,7 @@ const ProfileStack = () => (
     <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
     <Stack.Screen name="PackageList" component={PackageList} options={{ title: 'Chọn gói dịch vụ' }} />
     <Stack.Screen name="PaymentHistory" component={PaymentHistory} options={{ title: 'Lịch sử giao dịch' }} />
+    <Stack.Screen name="CreatePayment" component={CreatePayment} options={{ title: "Thanh toán" }} />
   </Stack.Navigator>
 );
 

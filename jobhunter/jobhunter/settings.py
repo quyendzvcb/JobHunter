@@ -144,3 +144,12 @@ OAUTH2_PROVIDER = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MOMO_CONFIG = {
+    'endpoint': 'https://test-payment.momo.vn/v2/gateway/api/create',
+    'partner_code': 'MOMO',
+    'access_key': 'F8BBA842ECF85',
+    'secret_key': 'K951B6PE1waDMi640xX08PD3vg6EkVlz',
+    'redirect_url': 'http://localhost:3000/payment-result',
+    'ipn_url': 'https://quyendz.pythonanywhere.com/api/payment/momo-ipn/'
+}

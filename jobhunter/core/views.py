@@ -1,6 +1,6 @@
 import datetime
-import uuid
-
+import json, hmac, hashlib, uuid, requests
+from django.conf import settings
 from django.db.models.functions import TruncQuarter, TruncYear, TruncMonth
 from rest_framework import viewsets, filters, generics, status
 from core import perms, paginators
@@ -170,42 +170,136 @@ class ServicePackageViewSet(viewsets.ReadOnlyModelViewSet):
             target_user=self.request.user.role
         )
 
-class PaymentViewSet(viewsets.GenericViewSet):
-    serializer_class = serializers.TransactionSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    @action(methods=['post'], detail=False, url_path='create-transaction')
-    def create_transaction(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        package = serializer.validated_data['service_package']
-
-        transaction_id = f"PAY-{datetime.datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
-
-        transaction = serializer.save(
-            user=request.user,
-            amount=package.price,
-            transaction_id=transaction_id,
-        )
-        return Response(serializers.TransactionSerializer(transaction).data, status=status.HTTP_201_CREATED
-        )
-
-    @action(methods=['get'], detail=False, url_path='history')
-    def transaction_history(self, request):
-        history = Transaction.objects.filter(user=request.user).order_by('-created_at')
-        return Response(serializers.TransactionSerializer(history, many=True).data)
-
 
 class LocationViewSet(viewsets.ViewSet, generics.ListAPIView):
     serializer_class = serializers.LocationSerializer
     queryset = Location.objects.filter(is_active=True)
     permission_classes = [permissions.AllowAny]
 
+
 class CategoryViewSet(viewsets.ViewSet, generics.ListAPIView):
     serializer_class = serializers.CategorySerializer
     queryset = Category.objects.filter(is_active=True)
     permission_classes = [permissions.AllowAny]
+
+
+class PaymentViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @action(methods=['post'], detail=False, url_path='momo-pay')
+    def create_momo_payment(self, request):
+        try:
+            # 1. Lấy thông tin từ Client (mua gói dịch vụ nào)
+            service_package_id = request.data.get('service_package_id')
+            if not service_package_id:
+                return Response({"error": "Thiếu service_package_id"}, status=status.HTTP_400_BAD_REQUEST)
+
+            service_package = ServicePackage.objects.get(id=service_package_id)
+            amount = int(service_package.price)
+
+            orderId = str(uuid.uuid4())
+            requestId = str(uuid.uuid4())
+            orderInfo = f"Thanh toan goi {service_package.name}"
+
+            # Lấy config
+            MOMO_CONFIG = settings.MOMO_CONFIG
+
+            # 3. Tạo chữ ký HMAC SHA256
+            raw_signature = (
+                f"accessKey={MOMO_CONFIG['access_key']}"
+                f"&amount={amount}"
+                f"&extraData="
+                f"&ipnUrl={MOMO_CONFIG['ipn_url']}"
+                f"&orderId={orderId}"
+                f"&orderInfo={orderInfo}"
+                f"&partnerCode={MOMO_CONFIG['partner_code']}"
+                f"&redirectUrl={MOMO_CONFIG['redirect_url']}"
+                f"&requestId={requestId}"
+                f"&requestType=captureWallet"
+            )
+
+            h = hmac.new(
+                bytes(MOMO_CONFIG['secret_key'], 'ascii'),
+                bytes(raw_signature, 'utf-8'),
+                hashlib.sha256
+            )
+            signature = h.hexdigest()
+
+            data = {
+                'partnerCode': MOMO_CONFIG['partner_code'],
+                'partnerName': "Job Hunter",
+                'storeId': "JobHunterStore",
+                'requestId': requestId,
+                'amount': str(amount),
+                'orderId': orderId,
+                'orderInfo': orderInfo,
+                'redirectUrl': MOMO_CONFIG['redirect_url'],
+                'ipnUrl': MOMO_CONFIG['ipn_url'],
+                'lang': 'vi',
+                'extraData': "",
+                'requestType': "captureWallet",
+                'signature': signature
+            }
+
+            res = requests.post(MOMO_CONFIG['endpoint'], json=data)
+            json_res = res.json()
+
+            if str(json_res.get('resultCode')) == '0':
+                Transaction.objects.create(
+                    user=request.user,
+                    service_package=service_package,
+                    amount=amount,
+                    payment_method=Transaction.PaymentMethod.MOMO,
+                    transaction_id=orderId,
+                    status=Transaction.Status.PENDING
+                )
+
+                return Response({'payUrl': json_res['payUrl']})
+            else:
+                return Response(
+                    {'error': json_res.get('localMessage'), 'momo_code': json_res.get('errorCode')},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        except ServicePackage.DoesNotExist:
+            return Response({"error": "Không tìm thấy gói dịch vụ"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    @action(methods=['post'], detail=False, url_path='ipn', permission_classes=[permissions.AllowAny],
+            authentication_classes=[])
+    def process_momo_ipn(self, request):
+        data = request.data
+        print("LOG IPN MOMO:", data)
+
+        resultCode = str(data.get('resultCode'))
+        orderId = data.get('orderId')
+
+
+        check = (resultCode == '0')
+
+        if check:
+            try:
+                transaction = Transaction.objects.get(transaction_id=orderId)
+
+                if transaction.status == Transaction.Status.PENDING:
+                    transaction.status = Transaction.Status.SUCCESS
+                    transaction.save()
+
+                    # TODO: Nếu cần kích hoạt quyền lợi cho user ngay tại đây thì viết thêm code
+                    transaction.user.is_premium = True
+
+                    print(f"Đã cập nhật thành công đơn hàng {orderId}")
+
+            except Transaction.DoesNotExist:
+                print(f"Không tìm thấy transaction {orderId}")
+            except Exception as e:
+                print(f"Lỗi xử lý IPN: {e}")
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 
 
 
