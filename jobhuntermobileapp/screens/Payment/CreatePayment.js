@@ -52,10 +52,11 @@ const CreatePayment = ({ route, navigation }) => {
                 payment_method: paymentMethod
             });
 
-            console.log(res)
 
             // Xử lý link thanh toán trả về (cho Momo, ZaloPay, v.v.)
             const payUrl = res.data.payUrl || res.data.payment_url;
+
+            console.log(payUrl)
 
             if (payUrl) {
                 const supported = await Linking.canOpenURL(payUrl);

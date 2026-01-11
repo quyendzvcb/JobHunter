@@ -267,7 +267,7 @@ class PaymentViewSet(viewsets.ViewSet):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-    @action(methods=['post'], detail=False, url_path='ipn', permission_classes=[permissions.AllowAny],
+    @action(methods=['post'], detail=False, url_path='momo-ipn', permission_classes=[permissions.AllowAny],
             authentication_classes=[])
     def process_momo_ipn(self, request):
         data = request.data
@@ -298,6 +298,11 @@ class PaymentViewSet(viewsets.ViewSet):
                 print(f"Lỗi xử lý IPN: {e}")
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(methods=['get'], detail=False, url_path='history')
+    def transaction_history(self, request):
+        history = Transaction.objects.filter(user=request.user).order_by('-created_at')
+        return Response(serializers.TransactionSerializer(history, many=True).data)
 
 
 

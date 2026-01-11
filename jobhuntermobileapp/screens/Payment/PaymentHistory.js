@@ -24,6 +24,8 @@ const PaymentHistory = () => {
         loadHistory();
     }, []);
 
+    console.log(history)
+
     const getStatusColor = (status) => {
         if (status === 'SUCCESS') return '#4CAF50';
         if (status === 'PENDING') return '#FF9800';
