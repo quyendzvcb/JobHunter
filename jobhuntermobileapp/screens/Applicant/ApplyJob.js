@@ -1,13 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { View, ScrollView, StyleSheet, Alert, TouchableOpacity, Image } from 'react-native';
-import { Text, TextInput, Button, HelperText } from 'react-native-paper';
-import * as ImagePicker from 'expo-image-picker'; // [THAY ĐỔI] Dùng ImagePicker
+import { Text, Button, HelperText } from 'react-native-paper';
+import * as ImagePicker from 'expo-image-picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MyUserContext } from "../../utils/contexts/MyUserContext";
 import { authApis, endpoints } from "../../utils/Apis";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { uploadToCloudinary } from '../../utils/CloudinaryUpload';
-import UnifiedTextInput from '../../components/Common/UnifiedTextInput';
+import { uploadToCloudinary } from '../../components/Upload/CloudinaryUpload';
+import UnifiedTextInput from "../../components/Common/UnifiedTextInput";
 
 const ApplyJob = ({ route, navigation }) => {
     const { jobId } = route.params;
@@ -32,6 +32,8 @@ const ApplyJob = ({ route, navigation }) => {
         }
     };
 
+    console.log(newFile)
+
     const handleSendApplication = async () => {
         if (!fullName || !phone) {
             Alert.alert("Thiếu thông tin", "Vui lòng điền đầy đủ Họ tên và Số điện thoại.");
@@ -48,14 +50,11 @@ const ApplyJob = ({ route, navigation }) => {
         try {
             const cvUrl = await uploadToCloudinary(newFile);
 
-            console.log(cvUrl);
             if (!cvUrl) {
                 Alert.alert("Lỗi Upload", "Không thể tải ảnh lên. Vui lòng thử lại.");
                 setLoading(false);
                 return;
             }
-
-            console.log("Upload ảnh thành công, URL:", cvUrl);
 
             const token = await AsyncStorage.getItem('token');
             const formData = new FormData();
@@ -63,11 +62,6 @@ const ApplyJob = ({ route, navigation }) => {
             formData.append('cover_letter', coverLetter);
             formData.append('job', jobId);
             formData.append('cv_url', cvUrl);
-            console.log("Dữ liệu gửi đi:", {
-                cover_letter: coverLetter,
-                job: jobId,
-                cv_url: cvUrl
-            });
 
             const res = await authApis(token).post(endpoints['apply-job'], formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
@@ -89,16 +83,12 @@ const ApplyJob = ({ route, navigation }) => {
 
     return (
         <ScrollView style={styles.container}>
-            {/* --- Section 1: Upload Ảnh CV --- */}
             <Text style={styles.sectionTitle}>Ảnh CV / Portfolio <Text style={{ color: 'red' }}>*</Text></Text>
 
             <View style={styles.uploadArea}>
                 {newFile ? (
-                    // [THAY ĐỔI] Giao diện khi đã chọn ảnh (Hiện Preview)
                     <View style={styles.fileSelectedBox}>
-                        {/* Hiện ảnh thumbnail */}
                         <Image source={{ uri: newFile.uri }} style={{ width: 50, height: 50, borderRadius: 4, marginRight: 10 }} />
-
                         <View style={{ flex: 1 }}>
                             <Text numberOfLines={1} style={{ fontWeight: 'bold' }}>{newFile.name}</Text>
                             <Text style={{ fontSize: 12, color: 'gray' }}>
@@ -110,49 +100,49 @@ const ApplyJob = ({ route, navigation }) => {
                         </TouchableOpacity>
                     </View>
                 ) : (
-                    // Giao diện chưa chọn file
                     <Button
                         mode="outlined"
-                        onPress={pickImage} // Gọi hàm pickImage
+                        onPress={pickImage}
                         style={styles.fileBtn}
-                        icon="image-outline" // Đổi icon
+                        icon="image-outline"
                         textColor="#2563eb"
                     >
                         Chọn ảnh từ thư viện
                     </Button>
                 )}
-                {/* Cập nhật HelperText */}
                 <HelperText type="info" style={styles.helper}>
                     Hỗ trợ: .jpg, .png, .jpeg (Max 5MB)
                 </HelperText>
             </View>
 
-            {/* --- Section 2: Thông tin cá nhân (GIỮ NGUYÊN) --- */}
             <Text style={styles.sectionTitle}>Thông Tin Cá Nhân</Text>
+
+            {/* ✅ onChangeText với setter trực tiếp */}
             <UnifiedTextInput
                 label="Họ và tên *"
                 value={fullName}
-                onChange={setFullName}
+                onChangeText={setFullName}
                 icon="account"
                 wrapperStyle={styles.input}
             />
+
             <UnifiedTextInput
                 label="Số điện thoại *"
                 value={phone}
-                onChange={setPhone}
+                onChangeText={setPhone}
                 icon="phone"
                 keyboardType="phone-pad"
                 wrapperStyle={styles.input}
             />
 
-            {/* --- Section 3: Cover Letter (GIỮ NGUYÊN) --- */}
             <Text style={styles.sectionTitle}>Thư giới thiệu <Text style={{ color: 'gray', fontSize: 14 }}>(Tùy chọn)</Text></Text>
             <Text style={styles.subHint}>Hãy cho nhà tuyển dụng biết tại sao bạn phù hợp.</Text>
+
             <UnifiedTextInput
-                label="Thư giới thiệu"
+                label="Nội dung"
                 value={coverLetter}
-                onChange={setCoverLetter}
-                placeholder="Viết ngắn gọn về kinh nghiệm..."
+                onChangeText={setCoverLetter}
+                placeholder="Viết ngắn gọn về kinh nghiệm và kỹ năng của bạn..."
                 icon="file-document"
                 multiline={true}
                 numberOfLines={5}
@@ -161,7 +151,6 @@ const ApplyJob = ({ route, navigation }) => {
                 wrapperStyle={styles.input}
             />
 
-            {/* --- Submit Button (GIỮ NGUYÊN) --- */}
             <Button
                 mode="contained"
                 onPress={handleSendApplication}
@@ -181,7 +170,6 @@ const ApplyJob = ({ route, navigation }) => {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#fff', padding: 16 },
     sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 20, marginBottom: 10, color: '#1f2937' },
-
     uploadArea: { marginBottom: 10 },
     fileBtn: { borderColor: '#2563eb', borderStyle: 'dashed', borderWidth: 1 },
     fileSelectedBox: {
@@ -193,13 +181,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#bae6fd'
     },
-
     helper: { paddingHorizontal: 0, marginTop: 4, fontStyle: 'italic' },
     input: { marginBottom: 15, backgroundColor: '#fff' },
     subHint: { fontSize: 14, marginBottom: 8, color: '#6b7280' },
-    textArea: { backgroundColor: '#fff', height: 120, textAlignVertical: 'top' },
-    charCount: { textAlign: 'right', fontSize: 12, color: '#9ca3af', marginTop: 5 },
-
     submitBtn: { marginTop: 30, backgroundColor: '#2563eb', borderRadius: 8 },
 });
 
