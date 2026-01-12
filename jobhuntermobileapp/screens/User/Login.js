@@ -2,7 +2,6 @@ import React, { useState, useContext } from "react";
 import { View, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import LoginStyle from "./LoginStyle";
 import Apis, { endpoints, authApis } from "../../utils/Apis";
 import { MyUserContext } from "../../utils/contexts/MyUserContext";
@@ -11,7 +10,7 @@ import UnifiedTextInput from "../../components/Common/UnifiedTextInput";
 
 const Login = () => {
     const nav = useNavigation();
-    const [username, setUsername] = useState("");  // ← Tách thành state riêng
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -22,31 +21,19 @@ const Login = () => {
             Alert.alert("Thông báo", "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!");
             return;
         }
-
         try {
             setLoading(true);
             const res = await Apis.post(endpoints['login'], {
-                username,      // ← Dùng state tách
-                password,
+                username, password,
                 'grant_type': 'password',
                 'client_id': process.env.EXPO_PUBLIC_CLIENT_ID,
                 'client_secret': process.env.EXPO_PUBLIC_CLIENT_SECRET
-            }, {
-                headers: { "Content-Type": "application/x-www-form-urlencoded" }
-            });
+            }, { headers: { "Content-Type": "application/x-www-form-urlencoded" } });
 
             await AsyncStorage.setItem("token", res.data.access_token);
-
-            setTimeout(async () => {
-                const userRes = await authApis(res.data.access_token).get(endpoints['current-user']);
-                dispatch({
-                    "type": "login",
-                    "payload": userRes.data
-                });
-            }, 500);
-
+            const userRes = await authApis(res.data.access_token).get(endpoints['current-user']);
+            dispatch({ "type": "login", "payload": userRes.data });
         } catch (ex) {
-            console.error(ex);
             Alert.alert("Lỗi", "Tên đăng nhập hoặc mật khẩu không chính xác!");
         } finally {
             setLoading(false);
@@ -54,28 +41,24 @@ const Login = () => {
     }
 
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={LoginStyle.container}
-        >
-            <ScrollView contentContainerStyle={[LoginStyle.scrollContent, { marginTop: 80 }]} showsVerticalScrollIndicator={false}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={LoginStyle.container}>
+            <ScrollView
+                contentContainerStyle={[LoginStyle.scrollContent, { marginTop: 80 }]}
+                keyboardShouldPersistTaps="handled" // Fix lỗi chạm iOS
+                showsVerticalScrollIndicator={false}
+            >
                 <View style={LoginStyle.content}>
                     <View style={LoginStyle.header}>
                         <Text style={LoginStyle.title}>ĐĂNG NHẬP</Text>
                         <Text style={LoginStyle.subtitle}>Chào mừng bạn quay trở lại!</Text>
                     </View>
-
                     <View style={LoginStyle.form}>
-                        {/* ✅ onChangeText với setter trực tiếp */}
                         <UnifiedTextInput
                             label="Tên đăng nhập"
                             value={username}
                             onChangeText={setUsername}
                             icon="account"
-                            wrapperStyle={LoginStyle.inputWrapper}
                         />
-
-                        {/* ✅ onChangeText với setter trực tiếp */}
                         <UnifiedTextInput
                             label="Mật khẩu"
                             value={password}
@@ -85,25 +68,13 @@ const Login = () => {
                             rightIcon={
                                 <TextInput.Icon
                                     icon={showPassword ? "eye-off" : "eye"}
-                                    color="#2563eb"
                                     onPress={() => setShowPassword(!showPassword)}
                                 />
                             }
-                            wrapperStyle={LoginStyle.inputWrapper}
                         />
-
-                        <Button
-                            mode="contained"
-                            loading={loading}
-                            disabled={loading}
-                            style={LoginStyle.loginButton}
-                            labelStyle={LoginStyle.loginButtonLabel}
-                            contentStyle={{ height: 55 }}
-                            onPress={login}
-                        >
+                        <Button mode="contained" loading={loading} style={LoginStyle.loginButton} onPress={login}>
                             ĐĂNG NHẬP
                         </Button>
-
                         <View style={[LoginStyle.signupContainer, { marginTop: 10 }]}>
                             <Text style={LoginStyle.signupText}>Bạn chưa có tài khoản? </Text>
                             <TouchableOpacity onPress={() => nav.navigate("Register")}>

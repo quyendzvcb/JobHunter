@@ -80,7 +80,8 @@ const ApplyJob = ({ route, navigation }) => {
     };
 
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView style={styles.container}
+            keyboardShouldPersistTaps="handled">
             <Text style={styles.sectionTitle}>Ảnh CV / Portfolio <Text style={{ color: 'red' }}>*</Text></Text>
 
             <View style={styles.uploadArea}>

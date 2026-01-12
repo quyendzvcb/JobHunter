@@ -15,11 +15,14 @@ const CreatePayment = ({ route, navigation }) => {
     const [processing, setProcessing] = useState(false);
     const { width } = useWindowDimensions();
 
+    console.log(packageId)
+
     useEffect(() => {
         const loadPackageDetail = async () => {
             try {
                 const token = await AsyncStorage.getItem('token');
                 const res = await authApis(token).get(endpoints['package-detail'](packageId));
+                console.log(res)
                 setPackageDetail(res.data);
                 if (res.data.payment_methods && res.data.payment_methods.length > 0) {
                     setPaymentMethod(res.data.payment_methods[0].id);

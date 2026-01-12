@@ -287,10 +287,16 @@ class PaymentViewSet(viewsets.ViewSet):
                     transaction.status = Transaction.Status.SUCCESS
                     transaction.save()
 
-                    # TODO: Nếu cần kích hoạt quyền lợi cho user ngay tại đây thì viết thêm code
-                    transaction.user.is_premium = True
+                    user = transaction.user
+                    if user.role == User.Role.APPLICANT:
+                        try:
+                            applicant_profile = user.applicant
+                            applicant_profile.is_premium = True
+                            applicant_profile.save()
 
-                    print(f"Đã cập nhật thành công đơn hàng {orderId}")
+                            print(f"Đã kích hoạt Premium cho Applicant: {user.username}")
+                        except Exception as e:
+                            print(f"Lỗi: User {user.username} là APPLICANT nhưng không tìm thấy hồ sơ Applicant. {e}")
 
             except Transaction.DoesNotExist:
                 print(f"Không tìm thấy transaction {orderId}")
@@ -298,7 +304,7 @@ class PaymentViewSet(viewsets.ViewSet):
                 print(f"Lỗi xử lý IPN: {e}")
 
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
     @action(methods=['get'], detail=False, url_path='history')
     def transaction_history(self, request):
         history = Transaction.objects.filter(user=request.user).order_by('-created_at')

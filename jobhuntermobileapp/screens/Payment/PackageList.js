@@ -27,7 +27,6 @@ const PackageList = ({ navigation }) => {
     }, []);
 
     const goToPayment = (pkgId) => {
-        // Chỉ truyền packageId sang màn hình CreatePayment
         navigation.navigate("CreatePayment", { packageId: pkgId });
     };
 

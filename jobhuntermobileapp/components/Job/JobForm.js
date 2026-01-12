@@ -106,7 +106,8 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
     }
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }}>
+        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }}
+            keyboardShouldPersistTaps="handled">
             <Text style={styles.headerTitle}>
                 {initialValues ? "CẬP NHẬT TIN TUYỂN DỤNG" : "ĐĂNG TIN TUYỂN DỤNG MỚI"}
             </Text>
@@ -114,7 +115,7 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
             <UnifiedTextInput
                 label="Tiêu đề công việc *"
                 value={job.title}
-                onChange={(t) => handleChange('title', t)}
+                onChangeText={(t) => handleChange('title', t)}
                 wrapperStyle={styles.input}
             />
 
@@ -138,14 +139,14 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
                 <UnifiedTextInput
                     label="Lương tối thiểu"
                     value={job.salary_min}
-                    onChange={(t) => handleChange('salary_min', t)}
+                    onChangeText={(t) => handleChange('salary_min', t)}
                     keyboardType="numeric"
                     wrapperStyle={[styles.input, styles.halfInput]}
                 />
                 <UnifiedTextInput
                     label="Lương tối đa"
                     value={job.salary_max}
-                    onChange={(t) => handleChange('salary_max', t)}
+                    onChangeText={(t) => handleChange('salary_max', t)}
                     keyboardType="numeric"
                     wrapperStyle={[styles.input, styles.halfInput]}
                 />
@@ -154,7 +155,7 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
             <UnifiedTextInput
                 label="Hạn nộp"
                 value={job.deadline}
-                onChange={(t) => handleChange('deadline', t)}
+                onChangeText={(t) => handleChange('deadline', t)}
                 icon="calendar"
                 placeholder="YYYY-MM-DD"
                 wrapperStyle={styles.input}
@@ -163,7 +164,7 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
             <UnifiedTextInput
                 label="Mô tả công việc *"
                 value={job.description}
-                onChange={(t) => handleChange('description', t)}
+                onChangeText={(t) => handleChange('description', t)}
                 multiline={true}
                 numberOfLines={4}
                 wrapperStyle={styles.input}
@@ -172,7 +173,7 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
             <UnifiedTextInput
                 label="Quyền lợi ứng viên"
                 value={job.benefits}
-                onChange={(t) => handleChange('benefits', t)}
+                onChangeText={(t) => handleChange('benefits', t)}
                 multiline={true}
                 numberOfLines={3}
                 wrapperStyle={styles.input}
@@ -181,7 +182,7 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
             <UnifiedTextInput
                 label="Yêu cầu công việc"
                 value={job.requirements}
-                onChange={(t) => handleChange('requirements', t)}
+                onChangeText={(t) => handleChange('requirements', t)}
                 multiline={true}
                 numberOfLines={3}
                 wrapperStyle={styles.input}

@@ -25,7 +25,7 @@ export const endpoints = {
     'create-payment': '/payment/momo-pay/',
 
     'packages': '/packages/',
-    'package-detail': (pkgId) => `/packages/${pkgId}`
+    'package-detail': (pkgId) => `/packages/${pkgId}/`
 };
 
 export const authApis = (token) => {
