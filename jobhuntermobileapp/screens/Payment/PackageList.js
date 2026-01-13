@@ -5,12 +5,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authApis, endpoints } from '../../utils/Apis';
 import RenderHTML from "react-native-render-html";
 
-const PackageList = ({ navigation }) => {
+const PackageList = ({ route, navigation }) => {
     const [packages, setPackages] = useState([]);
     const [loading, setLoading] = useState(false);
+    const { jobId } = route.params || {};
 
     const { width } = useWindowDimensions();
-    
+
 
     useEffect(() => {
         const loadPackages = async () => {
@@ -30,7 +31,7 @@ const PackageList = ({ navigation }) => {
     }, []);
 
     const goToPayment = (pkgId) => {
-        navigation.navigate("CreatePayment", { packageId: pkgId });
+        navigation.navigate("CreatePayment", { packageId: pkgId, jobId: jobId });
     };
 
     if (loading && packages.length === 0)

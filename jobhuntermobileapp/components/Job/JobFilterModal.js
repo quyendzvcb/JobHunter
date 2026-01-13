@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Button, Text, TextInput, RadioButton, Chip } from 'react-native-paper';
 import APIs, { endpoints } from '../../utils/Apis';
-// Dropdown có thể dùng thư viện ngoài hoặc tự custom simple view
-// Ở đây demo logic cơ bản
 
 const JobFilterModal = ({ currentFilters, onApply }) => {
     const [categories, setCategories] = useState([]);
@@ -27,6 +25,8 @@ const JobFilterModal = ({ currentFilters, onApply }) => {
         };
         loadData();
     }, []);
+
+    console.log(selectedLocs)
 
     const handleApply = () => {
         onApply({

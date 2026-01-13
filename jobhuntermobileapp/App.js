@@ -44,6 +44,9 @@ const RecruiterDashboardStack = () => (
     <Stack.Screen name="RecruiterHome" component={RecruiterHome} options={{ headerShown: false }} />
     <Stack.Screen name="JobEditor" component={JobEditor} option={{ headerShown: false }} />
     <Stack.Screen name="AddJob" component={AddJob} option={{ headerShown: false }} />
+    <Stack.Screen name="PackageList" component={PackageList} options={{ title: 'Chọn gói dịch vụ' }} />
+    <Stack.Screen name="CreatePayment" component={CreatePayment} options={{ title: "Thanh toán" }} />
+    <Stack.Screen name="PaymentHistory" component={PaymentHistory} options={{ title: 'Lịch sử giao dịch' }} />
   </Stack.Navigator>
 );
 

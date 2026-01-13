@@ -7,26 +7,38 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const AddJob = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
 
-    const handleCreate = async (jobData) => {
+    const handleCreateJob = async (formData) => {
         try {
-            setLoading(true);
             const token = await AsyncStorage.getItem('token');
-            const res = await authApis(token).post(endpoints['recruiter-jobs'], jobData);
+            const res = await authApis(token).post(endpoints['recruiter-jobs'], formData);
 
-            Alert.alert("Thành công", "Đăng tin tuyển dụng thành công!", [
-                { text: "OK", onPress: () => navigation.goBack() }
-            ]);
+            const newJobId = res.data.id;
+
+            Alert.alert(
+                "Đăng tin thành công!",
+                "Bạn có muốn mua gói Đẩy tin (Premium) để tiếp cận nhiều ứng viên hơn không?",
+                [
+                    {
+                        text: "Để sau",
+                        onPress: () => navigation.goBack(),
+                        style: "cancel"
+                    },
+                    {
+                        text: "MUA NGAY",
+                        onPress: () => navigation.navigate("PackageList", { jobId: newJobId })
+                    }
+                ]
+            );
+
         } catch (err) {
             console.error(err);
-            Alert.alert("Lỗi", "Có lỗi xảy ra khi đăng tin.");
-        } finally {
-            setLoading(false);
+            Alert.alert("Lỗi", "Không thể đăng tin.");
         }
-    };
+    }
 
     return (
         <JobForm
-            onSubmit={handleCreate}
+            onSubmit={handleCreateJob}
             loading={loading}
             buttonLabel="Đăng tin tuyển dụng"
         />

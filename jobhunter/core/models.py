@@ -101,6 +101,7 @@ class Transaction(BaseModel):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     service_package = models.ForeignKey(ServicePackage, on_delete=models.SET_NULL, null=True)
+    job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"GD-{self.id} [{self.status}]"

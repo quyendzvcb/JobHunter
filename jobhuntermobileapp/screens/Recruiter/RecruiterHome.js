@@ -22,6 +22,8 @@ const RecruiterHome = () => {
     const [statsData, setStatsData] = useState([]);
     const [overview, setOverview] = useState({ totalViews: 0, totalApplies: 0, avgRating: 0 });
 
+    const [filters, setFilters] = useState({ ordering: '-views' });
+
     const loadStats = useCallback(async () => {
         try {
             const token = await AsyncStorage.getItem('token');
@@ -117,6 +119,8 @@ const RecruiterHome = () => {
                 navigation={nav}
                 headerComponent={renderStatsHeader()}
                 onRefreshExternal={loadStats}
+                filters={filters} 
+                setFilters={setFilters}
             />
 
             <FAB icon="plus" label="Đăng tin" style={styles.fab} color="white" onPress={() => nav.navigate("AddJob")} />

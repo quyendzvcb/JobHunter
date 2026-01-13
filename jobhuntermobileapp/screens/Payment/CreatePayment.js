@@ -8,7 +8,7 @@ import { useWindowDimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const CreatePayment = ({ route, navigation }) => {
-    const { packageId } = route.params;
+    const { packageId, jobId } = route.params;
     const [packageDetail, setPackageDetail] = useState(null);
     const [loading, setLoading] = useState(true);
     const [paymentMethod, setPaymentMethod] = useState(''); // State lưu ID phương thức được chọn
@@ -52,7 +52,8 @@ const CreatePayment = ({ route, navigation }) => {
 
             const res = await authApis(token).post(endpoints['create-payment'], {
                 service_package_id: packageDetail.id,
-                payment_method: paymentMethod
+                payment_method: paymentMethod,
+                job_id: jobId
             });
 
 
@@ -127,36 +128,38 @@ const CreatePayment = ({ route, navigation }) => {
                     </Card>
 
                     {/* Chọn phương thức thanh toán (Render ĐỘNG từ API) */}
-                    <Card style={styles.card}>
-                        <Card.Title title="Phương thức thanh toán" titleStyle={styles.cardTitle} />
-                        <Card.Content>
-                            {packageDetail.payment_methods && packageDetail.payment_methods.length > 0 ? (
-                                <RadioButton.Group onValueChange={value => setPaymentMethod(value)} value={paymentMethod}>
-                                    {packageDetail.payment_methods.map((method, index) => {
+                    <Card.Content>
+                        {packageDetail.payment_methods && packageDetail.payment_methods.length > 0 ? (
+                            <RadioButton.Group onValueChange={value => setPaymentMethod(value)} value={paymentMethod}>
+                                {packageDetail.payment_methods.map((method, index) => {
+                                    const isMomo = method.id === 'MOMO';
 
-                                        return (
-                                            <View key={method.id}>
-                                                <View style={styles.radioItem}>
-                                                    <RadioButton value={method.id} color="#2563eb" />
-                                                    <View style={styles.methodInfo}>
-                                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                                            <Text style={styles.methodText}>{method.name}</Text>
-                                                        </View>
+                                    return (
+                                        <View key={method.id} style={!isMomo ? { opacity: 0.5 } : {}}>
+                                            <View style={styles.radioItem}>
+                                                <RadioButton
+                                                    value={method.id}
+                                                    color="#2563eb"
+                                                    disabled={!isMomo}
+                                                />
+                                                <View style={styles.methodInfo}>
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                        <Text style={styles.methodText}>{method.name}</Text>
                                                     </View>
+                                                    {!isMomo && <Text style={styles.subText}>Tạm thời chưa hỗ trợ</Text>}
                                                 </View>
-                                                {/* Thêm đường kẻ phân cách nếu không phải item cuối */}
-                                                {index < packageDetail.payment_methods.length - 1 && <Divider style={{ marginVertical: 8 }} />}
                                             </View>
-                                        );
-                                    })}
-                                </RadioButton.Group>
-                            ) : (
-                                <Text style={{ fontStyle: 'italic', color: 'gray', textAlign: 'center', padding: 10 }}>
-                                    Không có phương thức thanh toán khả dụng.
-                                </Text>
-                            )}
-                        </Card.Content>
-                    </Card>
+                                            {index < packageDetail.payment_methods.length - 1 && <Divider style={{ marginVertical: 8 }} />}
+                                        </View>
+                                    );
+                                })}
+                            </RadioButton.Group>
+                        ) : (
+                            <Text style={{ fontStyle: 'italic', color: 'gray', textAlign: 'center', padding: 10 }}>
+                                Không có phương thức thanh toán khả dụng.
+                            </Text>
+                        )}
+                    </Card.Content>
 
                     <View style={styles.footer}>
                         <Button

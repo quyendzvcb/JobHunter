@@ -153,7 +153,7 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
             </View>
 
             <UnifiedTextInput
-                label="Hạn nộp"
+                label="Hạn nộp (YYYY-MM-DD) *"
                 value={job.deadline}
                 onChangeText={(t) => handleChange('deadline', t)}
                 icon="calendar"
@@ -171,7 +171,7 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
             />
 
             <UnifiedTextInput
-                label="Quyền lợi ứng viên"
+                label="Quyền lợi ứng viên *"
                 value={job.benefits}
                 onChangeText={(t) => handleChange('benefits', t)}
                 multiline={true}
@@ -180,7 +180,7 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
             />
 
             <UnifiedTextInput
-                label="Yêu cầu công việc"
+                label="Yêu cầu công việc *"
                 value={job.requirements}
                 onChangeText={(t) => handleChange('requirements', t)}
                 multiline={true}

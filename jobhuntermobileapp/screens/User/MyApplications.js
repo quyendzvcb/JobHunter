@@ -205,7 +205,8 @@ const styles = StyleSheet.create({
     boldText: { fontWeight: 'bold', fontSize: 16, color: '#333' },
     dateText: { fontSize: 12, color: '#888', marginTop: 2 },
     premiumCardBorder: {
-        backgroundColor: '#FFFDF0', // Nền vàng cực nhạt để nổi bật
+        borderWidth: 3,
+        borderColor: '#FFFDF0',
     },
     premiumBadge: {
         position: 'absolute',

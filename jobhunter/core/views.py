@@ -10,7 +10,8 @@ from rest_framework import permissions
 from core import serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Q, Count, Sum, Avg
+from django.db.models import Q, Count, Sum, Avg, F
+
 
 
 class RecruiterJobViewSet(viewsets.ModelViewSet):
@@ -68,7 +69,7 @@ class RecruiterJobViewSet(viewsets.ModelViewSet):
 
 
 class JobViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
-    queryset = Job.objects.select_related('recruiter', 'category').prefetch_related('location').filter(is_active=True)
+    queryset = Job.objects.select_related('recruiter', 'category').prefetch_related('location').filter(is_active=True).distinct()
     pagination_class = paginators.JobPagination
     permission_classes = [permissions.AllowAny]
 
@@ -92,14 +93,40 @@ class JobViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVie
         ordering = params.get('ordering')
         if ordering == 'salary':
             qs = qs.order_by('-salary_max')
+        elif ordering == '-views':
+            qs = qs.order_by('-views')
         else:
-            qs = qs.order_by('-created_at')
+            qs = qs.order_by('-is_premium', '-created_at')
         return qs
 
     def get_serializer_class(self):
         if self.action == 'list':
             return serializers.JobSerializer
         return serializers.JobDetailsSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        user = request.user
+        should_count_view = False
+
+        if user.is_anonymous:
+            should_count_view = True
+
+        else:
+            if getattr(user, 'role', None) == 'APPLICANT':
+                should_count_view = True
+            elif getattr(user, 'role', None) == 'RECRUITER':
+                if instance.recruiter.user != user:
+                    should_count_view = True
+
+        if should_count_view:
+            Job.objects.filter(pk=instance.pk).update(views=F('views') + 1)
+
+            instance.refresh_from_db()
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     @action(methods=['get'], detail=False, url_path='compare')
     def compare_jobs(self, request):
@@ -200,6 +227,10 @@ class PaymentViewSet(viewsets.ViewSet):
         try:
             # 1. Lấy thông tin từ Client (mua gói dịch vụ nào)
             service_package_id = request.data.get('service_package_id')
+            job_id = request.data.get('job_id')
+            job_instance = None
+            if job_id:
+                job_instance = Job.objects.get(pk=job_id)
             if not service_package_id:
                 return Response({"error": "Thiếu service_package_id"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -260,7 +291,8 @@ class PaymentViewSet(viewsets.ViewSet):
                     amount=amount,
                     payment_method=Transaction.PaymentMethod.MOMO,
                     transaction_id=orderId,
-                    status=Transaction.Status.PENDING
+                    status=Transaction.Status.PENDING,
+                    job=job_instance
                 )
 
                 return Response({'payUrl': json_res['payUrl']})
@@ -295,6 +327,11 @@ class PaymentViewSet(viewsets.ViewSet):
                 if transaction.status == Transaction.Status.PENDING:
                     transaction.status = Transaction.Status.SUCCESS
                     transaction.save()
+
+                    if transaction.job:
+                        transaction.job.is_premium = True
+                        transaction.job.save()
+                        print(f"Đã kích hoạt Premium cho Job ID: {transaction.job.id}")
 
                     user = transaction.user
                     if user.role == User.Role.APPLICANT:

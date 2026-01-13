@@ -45,10 +45,17 @@ const JobsList = ({
 
             if (searchText) url += `&q=${searchText}`;
 
-            if (!isRecruiter && filters) {
-                if (filters.category_id) url += `&category_id=${filters.category_id}`;
-                if (filters.salary_min) url += `&salary_min=${filters.salary_min}`;
+            if (filters) {
                 if (filters.ordering) url += `&ordering=${filters.ordering}`;
+                if (!isRecruiter) {
+                    if (filters.category_id) url += `&category_id=${filters.category_id}`;
+                    if (filters.salary_min) url += `&salary_min=${filters.salary_min}`;
+                    if (filters.location_id && Array.isArray(filters.location_id)) {
+                        filters.location_id.forEach(id => {
+                            url += `&location_id=${id}`;
+                        });
+                    }
+                }
             }
 
             console.log("Calling API:", url);
@@ -56,9 +63,9 @@ const JobsList = ({
 
             // Xử lý dữ liệu trả về
             if (pageNum === 1) {
-                setJobs(res.data.results); // Trang 1: Gán mới hoàn toàn
+                setJobs(filterUnique(res.data.results)); // Trang 1: Gán mới hoàn toàn
             } else {
-                setJobs(prev => [...prev, ...res.data.results]); // Trang > 1: Nối thêm
+                setJobs(prev => filterUnique([...prev, ...res.data.results])); // Trang > 1: Nối thêm
             }
 
             // Kiểm tra next page từ API (Django REST Framework trả về null nếu hết trang)

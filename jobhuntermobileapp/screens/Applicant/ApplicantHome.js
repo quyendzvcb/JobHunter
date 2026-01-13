@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Provider, Portal, Modal, FAB } from 'react-native-paper';
-import JobsList from '../../components/Job/JobsList'; // Import component vừa tách
+import JobsList from '../../components/Job/JobsList';
 import JobFilterModal from '../../components/Job/JobFilterModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
@@ -89,6 +89,33 @@ const styles = StyleSheet.create({
         bottom: 0,
         backgroundColor: '#1976D2',
         transform: [{ scale: 0.9 }],
+    },
+    card: {
+        marginBottom: 10,
+        backgroundColor: 'white',
+        elevation: 2,
+        borderRadius: 8,
+        position: 'relative',
+    },
+    premiumCard: {
+        borderWidth: 2,
+        borderColor: '#FFD700',
+        backgroundColor: '#fffdf0',
+    },
+    hotBadge: {
+        position: 'absolute',
+        top: -10,
+        right: -5,
+        backgroundColor: 'red',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 4,
+        zIndex: 1,
+    },
+    hotText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 10,
     },
 });
 
