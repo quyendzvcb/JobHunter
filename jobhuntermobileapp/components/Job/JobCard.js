@@ -3,6 +3,7 @@ import { View, StyleSheet, Image } from 'react-native';
 import { Text, Card, Chip, Icon, IconButton, Button } from 'react-native-paper';
 import moment from 'moment';
 import 'moment/locale/vi';
+import styles from './Styles';
 moment.locale('vi');
 
 const JobCard = ({ job, navigation, isEditable = false, onEditPress }) => {
@@ -28,7 +29,6 @@ const JobCard = ({ job, navigation, isEditable = false, onEditPress }) => {
         }
     };
 
-    // Hàm chuyển sang trang mua gói
     const handlePromote = () => {
         navigation.navigate("PackageList", { jobId: job.id });
     };
@@ -39,7 +39,6 @@ const JobCard = ({ job, navigation, isEditable = false, onEditPress }) => {
             onPress={handlePress}
             mode="elevated"
         >
-            {/* Nhãn HOT cho tin Premium */}
             {isPremium && (
                 <View style={styles.hotBadge}>
                     <Text style={styles.hotText}>HOT</Text>
@@ -47,7 +46,6 @@ const JobCard = ({ job, navigation, isEditable = false, onEditPress }) => {
             )}
 
             <View style={styles.container}>
-                {/* Logo */}
                 <View style={styles.logoContainer}>
                     <Image
                         source={{ uri: logoUrl }}
@@ -56,10 +54,8 @@ const JobCard = ({ job, navigation, isEditable = false, onEditPress }) => {
                     />
                 </View>
 
-                {/* Nội dung chính */}
                 <View style={styles.contentContainer}>
 
-                    {/* Header: Tiêu đề + Nút Sửa */}
                     <View style={styles.headerRow}>
                         <Text variant="titleMedium" style={styles.title} numberOfLines={2}>
                             {job.title}
@@ -76,7 +72,6 @@ const JobCard = ({ job, navigation, isEditable = false, onEditPress }) => {
                         )}
                     </View>
 
-                    {/* Dòng 2: Tên công ty hoặc Trạng thái */}
                     {!isEditable ? (
                         <Text variant="bodySmall" style={styles.companyName} numberOfLines={1}>
                             {companyName}
@@ -116,7 +111,6 @@ const JobCard = ({ job, navigation, isEditable = false, onEditPress }) => {
                         </View>
                     )}
 
-                    {/* Dòng 3: Mức lương */}
                     <View style={styles.tagsRow}>
                         <View style={styles.tag}>
                             <Icon source="cash" size={14} color="#2e7d32" />
@@ -126,7 +120,6 @@ const JobCard = ({ job, navigation, isEditable = false, onEditPress }) => {
                         </View>
                     </View>
 
-                    {/* Dòng 4: Địa điểm */}
                     <View style={styles.metaRow}>
                         <View style={styles.metaChip}>
                             <Icon source="map-marker" size={13} color="#5c6bc0" />
@@ -136,7 +129,6 @@ const JobCard = ({ job, navigation, isEditable = false, onEditPress }) => {
                         </View>
                     </View>
 
-                    {/* Footer: Thời gian */}
                     <View style={styles.footer}>
                         <Text variant="labelSmall" style={styles.timeText}>
                             {moment(job.created_at, "DD-MM-YYYY HH:mm:ss").fromNow()}
@@ -147,148 +139,5 @@ const JobCard = ({ job, navigation, isEditable = false, onEditPress }) => {
         </Card>
     );
 };
-
-const styles = StyleSheet.create({
-    card: {
-        marginHorizontal: 10,
-        marginVertical: 6,
-        backgroundColor: 'white',
-        borderRadius: 8,
-        overflow: 'hidden',
-    },
-
-    premiumCard: {
-        borderWidth: 1.5,
-        borderColor: '#FFD700',
-        backgroundColor: '#FFFDF0',
-    },
-    // Nhãn HOT góc phải
-    hotBadge: {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        backgroundColor: '#FF0000',
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderBottomLeftRadius: 8,
-        zIndex: 10,
-    },
-    hotText: {
-        color: 'white',
-        fontSize: 10,
-        fontWeight: 'bold',
-    },
-    container: {
-        flexDirection: 'row',
-        padding: 12,
-    },
-    logoContainer: {
-        width: 60,
-        height: 60,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#f0f0f0',
-        borderRadius: 8,
-        marginRight: 12,
-        backgroundColor: '#fff'
-    },
-    logo: {
-        width: 50,
-        height: 50,
-    },
-    contentContainer: {
-        flex: 1,
-        justifyContent: 'space-between',
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-    },
-    title: {
-        fontWeight: 'bold',
-        fontSize: 16,
-        color: '#333',
-        marginBottom: 2,
-        flex: 1,
-        marginRight: 4,
-    },
-    editBtn: {
-        margin: 0,
-        marginTop: 2,
-        marginRight: -10,
-    },
-    companyName: {
-        color: '#757575',
-        marginBottom: 6,
-    },
-    statusChip: {
-        height: 24,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    tagsRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        marginBottom: 6,
-    },
-    tag: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 4,
-    },
-    salaryText: {
-        fontSize: 12,
-        color: '#2e7d32',
-        fontWeight: '600',
-        marginLeft: 4,
-    },
-    metaRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginBottom: 6,
-    },
-    metaChip: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#eef2ff',
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 12,
-        maxWidth: '100%',
-    },
-    metaText: {
-        fontSize: 12,
-        color: '#3f51b5',
-        marginLeft: 4,
-        flexShrink: 1,
-    },
-    footer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 0,
-        marginTop: 2
-    },
-    timeText: {
-        color: '#999',
-    },
-    promoteButton: {
-        borderColor: '#1976D2',
-        borderRadius: 20,
-        borderWidth: 1,
-    },
-    promoteButtonLabel: {
-        fontSize: 13,
-        fontWeight: 'bold',
-    },
-    promoteButtonContent: {
-        height: 36,
-    },
-});
 
 export default JobCard;

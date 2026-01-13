@@ -16,7 +16,6 @@ const JobEditor = ({ route, navigation }) => {
                 const token = await AsyncStorage.getItem('token');
                 const res = await authApis(token).get(endpoints['recruiter-job-detail'](jobId));
                 setJob(res.data)
-                console.log(res.data);
             } catch (ex) {
                 console.log(ex);
             }
@@ -33,7 +32,7 @@ const JobEditor = ({ route, navigation }) => {
                 { text: "OK", onPress: () => navigation.goBack() }
             ]);
         } catch (err) {
-            console.error(err);
+            console.log(err);
             Alert.alert("Lỗi", "Không thể cập nhật tin.");
         } finally {
             setLoading(false);
@@ -42,7 +41,7 @@ const JobEditor = ({ route, navigation }) => {
 
     return (
         <JobForm
-            initialValues={job} // Truyền dữ liệu cũ vào form
+            initialValues={job}
             onSubmit={handleUpdate}
             loading={loading}
             buttonLabel="Lưu thay đổi"

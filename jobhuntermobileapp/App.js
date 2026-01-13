@@ -99,7 +99,6 @@ const MainTabNavigator = () => {
         }}
       />
 
-      {/* TAB 3: CÁ NHÂN */}
       <Tab.Screen
         name="ProfileTab"
         component={ProfileStack}
@@ -112,7 +111,6 @@ const MainTabNavigator = () => {
   );
 };
 
-// --- APP COMPONENT ---
 const App = () => {
   const [user, dispatch] = useReducer(MyUserReducer, null);
 

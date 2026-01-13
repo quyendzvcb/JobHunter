@@ -7,7 +7,6 @@ import UnifiedTextInput from '../../components/Common/UnifiedTextInput';
 
 
 const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
-    // 1. State chỉ giữ những gì cần thiết cho logic giao diện
     const [job, setJob] = useState({
         title: '', salary_min: '', salary_max: '',
         location_ids: [], category_id: null, deadline: '',
@@ -21,7 +20,6 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
     const [fetchingData, setFetchingData] = useState(true);
 
 
-    // 2. Tải metadata (Chỉ chạy 1 lần duy nhất)
     useEffect(() => {
         const loadMetadata = async () => {
             try {
@@ -38,7 +36,6 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
         loadMetadata();
     }, []);
 
-    // 3. Nạp dữ liệu cũ (Chế độ Edit)
     useEffect(() => {
         if (initialValues) {
             setJob({
@@ -78,14 +75,12 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
         return item ? (item.name || item.city) : '';
     };
 
-    // 4. FIX LỖI 400: Map dữ liệu đúng tên trường Backend yêu cầu
     const validateAndSubmit = () => {
         if (!job.title || !job.description || !job.category_id || job.location_ids.length === 0) {
             Alert.alert("Thiếu thông tin", "Vui lòng nhập các trường có dấu (*)");
             return;
         }
 
-        // Tạo object mới để gửi đi với các key mà Backend mong muốn (theo ảnh screenshot)
         const dataToSubmit = {
             title: job.title,
             description: job.description,
@@ -94,8 +89,8 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
             salary_min: job.salary_min,
             salary_max: job.salary_max,
             deadline: job.deadline,
-            category: job.category_id, // Map từ category_id -> category
-            location: job.location_ids  // Map từ location_ids -> location
+            category: job.category_id,
+            location: job.location_ids
         };
 
         onSubmit(dataToSubmit);
@@ -123,7 +118,7 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
                 label="Ngành nghề *"
                 value={getSelectedLabel(categories, job.category_id)}
                 rightIcon={<TextInput.Icon icon="chevron-down" />}
-                onPress={() => setVisibleCat(true)}  // ← Dòng quan trọng
+                onPress={() => setVisibleCat(true)}
                 wrapperStyle={styles.input}
             />
 
@@ -132,7 +127,7 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
                 value={getSelectedLabel(locations, job.location_ids, true)}
                 rightIcon={<TextInput.Icon icon="chevron-down" />}
                 multiline={job.location_ids.length > 1}
-                onPress={() => setVisibleLoc(true)}  // ← Dòng quan trọng
+                onPress={() => setVisibleLoc(true)}
                 wrapperStyle={styles.input}
             />
             <View style={styles.row}>
@@ -240,17 +235,71 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { padding: 16, backgroundColor: '#fff', flex: 1 },
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    headerTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 20, color: '#1976D2', textAlign: 'center' },
-    input: { marginBottom: 15, backgroundColor: '#fff' },
-    row: { flexDirection: 'row', justifyContent: 'space-between' },
-    halfInput: { width: '48%' },
-    btnSubmit: { backgroundColor: '#1976D2', borderRadius: 8, marginTop: 10 },
-    modalContent: { backgroundColor: 'white', padding: 20, margin: 20, borderRadius: 12 },
-    modalTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 15, color: '#1976D2' },
-    checkItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 },
-    selectedText: { color: '#1976D2', fontWeight: 'bold' }
+    container: {
+        flex: 1,
+        padding: 16,
+        backgroundColor: '#fff',
+    },
+
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        color: '#1976D2',
+        textAlign: 'center',
+    },
+
+    input: {
+        marginBottom: 15,
+        backgroundColor: '#fff',
+    },
+
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+
+    halfInput: {
+        width: '48%',
+    },
+
+    btnSubmit: {
+        backgroundColor: '#1976D2',
+        borderRadius: 8,
+        marginTop: 10,
+    },
+
+    modalContent: {
+        backgroundColor: 'white',
+        padding: 20,
+        margin: 20,
+        borderRadius: 12,
+    },
+
+    modalTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        color: '#1976D2',
+    },
+
+    checkItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 12,
+    },
+
+    selectedText: {
+        color: '#1976D2',
+        fontWeight: 'bold',
+    },
 });
 
 export default JobForm;

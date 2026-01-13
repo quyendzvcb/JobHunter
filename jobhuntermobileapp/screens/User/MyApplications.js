@@ -65,7 +65,6 @@ const MyApplications = () => {
 
     const filteredItems = items.filter(item => TAB_STATUS[selectedTab]?.includes(item.status));
 
-    // --- RENDER ITEM RECRUITER (ĐÃ SỬA: Hiển thị Tên + SĐT, bấm vào chuyển trang) ---
     const renderRecruiterItem = ({ item }) => {
         const applicantName = `${item.applicant_detail?.full_name}`;
         const phone = item.applicant_detail?.phone_number || "Chưa cập nhật SĐT";
@@ -81,7 +80,6 @@ const MyApplications = () => {
                     isPremium && styles.premiumCardBorder
                 ]}>
 
-                    {/* Nhãn Premium góc nhỏ */}
                     {isPremium && (
                         <View style={styles.premiumBadge}>
                             <MaterialCommunityIcons name="crown" size={10} color="white" />
@@ -90,10 +88,8 @@ const MyApplications = () => {
                     <Card.Content>
                         <View style={styles.row}>
                             <View style={{ marginLeft: 12, flex: 1 }}>
-                                {/* Hiển thị Họ Tên */}
                                 <Text style={styles.boldText}>{applicantName}</Text>
 
-                                {/* Hiển thị SĐT */}
                                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
                                     <MaterialCommunityIcons name="phone" size={14} color="#666" />
                                     <Text style={{ fontSize: 13, color: '#555', marginLeft: 4 }}>{phone}</Text>
@@ -122,7 +118,6 @@ const MyApplications = () => {
         );
     };
 
-    // --- RENDER ITEM APPLICANT (Giữ nguyên) ---
     const renderApplicantItem = ({ item }) => (
         <Card style={styles.card}>
             <Card.Content>
@@ -191,36 +186,106 @@ const MyApplications = () => {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fff', marginTop: 30 },
-    header: { padding: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
-    headerTitle: { fontWeight: 'bold', color: '#1976D2', fontSize: 20 },
-    center: { justifyContent: 'center', alignItems: 'center', flex: 1 },
-    tabContainer: { flexDirection: 'row', backgroundColor: '#fff', paddingHorizontal: 10 },
-    tabItem: { flex: 1, paddingVertical: 12, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent', flexDirection: 'row', justifyContent: 'center' },
-    activeTabItem: { borderBottomColor: '#1976D2' },
-    tabText: { fontSize: 14, color: '#666', fontWeight: '500' },
-    activeTabText: { color: '#1976D2', fontWeight: 'bold' },
-    card: { backgroundColor: '#fff', marginBottom: 12, borderRadius: 10, elevation: 2, marginHorizontal: 2 },
-    row: { flexDirection: 'row', alignItems: 'center' },
-    boldText: { fontWeight: 'bold', fontSize: 16, color: '#333' },
-    dateText: { fontSize: 12, color: '#888', marginTop: 2 },
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        marginTop: 30,
+    },
+
+    header: {
+        padding: 16,
+        backgroundColor: '#fff',
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+    },
+
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1976D2',
+    },
+
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    tabContainer: {
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+        paddingHorizontal: 10,
+    },
+
+    tabItem: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 12,
+        borderBottomWidth: 2,
+        borderBottomColor: 'transparent',
+    },
+
+    activeTabItem: {
+        borderBottomColor: '#1976D2',
+    },
+
+    tabText: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#666',
+    },
+
+    activeTabText: {
+        color: '#1976D2',
+        fontWeight: 'bold',
+    },
+
+    card: {
+        backgroundColor: '#fff',
+        marginBottom: 12,
+        marginHorizontal: 2,
+        borderRadius: 10,
+        elevation: 2,
+    },
+
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+
+    boldText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+
+    dateText: {
+        fontSize: 12,
+        color: '#888',
+        marginTop: 2,
+    },
+
     premiumCardBorder: {
         borderWidth: 3,
         borderColor: '#FFFDF0',
     },
+
     premiumBadge: {
         position: 'absolute',
         top: 0,
         right: 0,
-        backgroundColor: '#FFD700',
+        zIndex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 8,
         paddingVertical: 2,
+        backgroundColor: '#FFD700',
         borderTopRightRadius: 10,
         borderBottomLeftRadius: 10,
-        zIndex: 1,
     },
+
     premiumBadgeText: {
         color: 'white',
         fontSize: 8,

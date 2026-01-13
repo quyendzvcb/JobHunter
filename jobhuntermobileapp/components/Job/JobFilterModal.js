@@ -7,7 +7,6 @@ const JobFilterModal = ({ currentFilters, onApply }) => {
     const [categories, setCategories] = useState([]);
     const [locations, setLocations] = useState([]);
 
-    // Local state cho form
     const [selectedCate, setSelectedCate] = useState(currentFilters.category_id);
     const [selectedLocs, setSelectedLocs] = useState(currentFilters.location_id || []);
     const [minSalary, setMinSalary] = useState(currentFilters.salary_min);
@@ -25,8 +24,6 @@ const JobFilterModal = ({ currentFilters, onApply }) => {
         };
         loadData();
     }, []);
-
-    console.log(selectedLocs)
 
     const handleApply = () => {
         onApply({
@@ -100,11 +97,33 @@ const JobFilterModal = ({ currentFilters, onApply }) => {
 };
 
 const styles = StyleSheet.create({
-    title: { fontSize: 20, fontWeight: 'bold', marginBottom: 15, textAlign: 'center' },
-    label: { marginTop: 10, marginBottom: 5, fontWeight: '600' },
-    scrollRow: { flexDirection: 'row', marginBottom: 10 },
-    chip: { marginRight: 8 },
-    btnRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }
+    title: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+
+    label: {
+        marginTop: 10,
+        marginBottom: 5,
+        fontWeight: '600',
+    },
+
+    scrollRow: {
+        flexDirection: 'row',
+        marginBottom: 10,
+    },
+
+    chip: {
+        marginRight: 8,
+    },
+
+    btnRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 20,
+    },
 });
 
 export default JobFilterModal;

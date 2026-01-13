@@ -4,22 +4,20 @@ import { Text, Button, Avatar, RadioButton, TextInput, Divider, Card } from 'rea
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authApis, endpoints } from '../../utils/Apis';
+import styles from './Styles';
 
 const ApplicationDetail = ({ route, navigation }) => {
     const { application } = route.params;
     const applicant = application.applicant_detail || {};
 
-    // State lưu rating dưới dạng STRING để người dùng có thể gõ dấu chấm (ví dụ "8.")
     const [rating, setRating] = useState(application.recruiter_rating ? String(application.recruiter_rating) : '');
     const [status, setStatus] = useState(application.status || 'PENDING');
     const [submitting, setSubmitting] = useState(false);
 
     const handleUpdate = async () => {
-        // 1. Chuẩn hóa: Thay dấu phẩy thành dấu chấm (đề phòng bàn phím tiếng Việt/Pháp)
         const normalizedRating = rating.replace(',', '.');
         const numRating = parseFloat(normalizedRating);
 
-        // 2. Validate số thực
         if (rating && (isNaN(numRating) || numRating < 0 || numRating > 10)) {
             Alert.alert("Lỗi", "Vui lòng nhập điểm số hợp lệ (0 - 10)");
             return;
@@ -30,17 +28,16 @@ const ApplicationDetail = ({ route, navigation }) => {
             const token = await AsyncStorage.getItem('token');
             const payload = {
                 status: status,
-                recruiter_rating: rating ? numRating : 0 // Gửi số thực lên server
+                recruiter_rating: rating ? numRating : 0 
             };
 
-            // Gọi API
             await authApis(token).patch(endpoints['evaluate-application'](application.id), payload);
 
             Alert.alert("Thành công", "Đã cập nhật đánh giá!", [
                 { text: "OK", onPress: () => navigation.goBack() }
             ]);
         } catch (e) {
-            console.error(e);
+            console.log(e);
             Alert.alert("Lỗi", "Cập nhật thất bại. Vui lòng thử lại.");
         } finally {
             setSubmitting(false);
@@ -57,7 +54,6 @@ const ApplicationDetail = ({ route, navigation }) => {
 
     return (
         <ScrollView style={styles.container}>
-            {/* --- Header --- */}
             <View style={styles.header}>
                 <View style={{ flexDirection: 'row' }}>
                     <View style={{ marginLeft: 15, flex: 1 }}>
@@ -71,7 +67,6 @@ const ApplicationDetail = ({ route, navigation }) => {
 
             <Divider />
 
-            {/* --- Nội dung --- */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Thư giới thiệu</Text>
                 <Text style={styles.content}>{application.cover_letter || "Không có nội dung giới thiệu."}</Text>
@@ -87,7 +82,6 @@ const ApplicationDetail = ({ route, navigation }) => {
                 </Button>
             </View>
 
-            {/* --- Form Đánh giá --- */}
             <Card style={styles.evaluationCard}>
                 <Card.Content>
                     <Text style={[styles.sectionTitle, { color: '#1976D2', marginBottom: 15 }]}>
@@ -107,7 +101,6 @@ const ApplicationDetail = ({ route, navigation }) => {
                         style={{ backgroundColor: 'white', marginBottom: 20 }}
                     />
 
-                    {/* Radio Status */}
                     <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Trạng thái hồ sơ:</Text>
                     <RadioButton.Group onValueChange={newValue => setStatus(newValue)} value={status}>
                         <View style={styles.radioRow}>
@@ -137,17 +130,5 @@ const ApplicationDetail = ({ route, navigation }) => {
         </ScrollView>
     );
 };
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7FA' },
-    header: { padding: 20, backgroundColor: 'white' },
-    name: { fontSize: 20, fontWeight: 'bold', color: '#333', marginBottom: 10 },
-    contactBar: { flexDirection: 'row', marginTop: 10, marginLeft: -10 },
-    section: { padding: 20, backgroundColor: 'white', marginTop: 10 },
-    sectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 10, color: '#444' },
-    content: { lineHeight: 22, color: '#333', backgroundColor: '#f9f9f9', padding: 10, borderRadius: 8 },
-    evaluationCard: { margin: 15, backgroundColor: 'white', elevation: 3 },
-    radioRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 5 },
-});
 
 export default ApplicationDetail;

@@ -36,7 +36,6 @@ export default StyleSheet.create({
         color: "#6b7280",
     },
 
-    // --- Role Switcher ---
     roleContainer: {
         flexDirection: 'row',
         backgroundColor: LIGHT_GRAY,
@@ -70,7 +69,6 @@ export default StyleSheet.create({
         fontWeight: "700",
     },
 
-    // --- Avatar ---
     avatarContainer: {
         alignItems: 'center',
         marginBottom: 30,
@@ -85,10 +83,10 @@ export default StyleSheet.create({
         alignItems: 'center',
         backgroundColor: LIGHT_GRAY,
         overflow: 'hidden',
-        borderStyle: 'dashed', // Viền nét đứt nếu chưa có ảnh
+        borderStyle: 'dashed',
     },
     avatarWrapperSelected: {
-        borderStyle: 'solid', // Viền liền nếu đã có ảnh
+        borderStyle: 'solid',
     },
     avatarLabel: {
         marginTop: 10,
@@ -97,12 +95,11 @@ export default StyleSheet.create({
         fontWeight: "600"
     },
 
-    // --- Form Inputs (Giống Login) ---
     form: {
         width: '100%',
     },
     inputWrapper: {
-        marginBottom: 20, // Khoảng cách rộng hơn
+        marginBottom: 20,
     },
     input: {
         backgroundColor: LIGHT_GRAY,
@@ -120,13 +117,11 @@ export default StyleSheet.create({
         paddingLeft: 10,
     },
 
-    // --- Button (Giống Login) ---
     registerButton: {
         backgroundColor: PRIMARY_BLUE,
         borderRadius: 12,
         marginTop: 20,
         marginBottom: 20,
-        // Hiệu ứng đổ bóng giống Login
         shadowColor: PRIMARY_BLUE,
         shadowOffset: { width: 0, height: 5 },
         shadowOpacity: 0.3,
@@ -140,7 +135,6 @@ export default StyleSheet.create({
         paddingVertical: 2,
     },
 
-    // --- Footer ---
     loginContainer: {
         flexDirection: "row",
         justifyContent: "center",
@@ -158,7 +152,6 @@ export default StyleSheet.create({
         fontSize: 14,
     },
 
-    // --- Helpers ---
     row: {
         flexDirection: 'row',
         alignItems: 'center',

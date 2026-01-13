@@ -16,7 +16,6 @@ const Register = () => {
     const [showPass, setShowPass] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
-    // ✅ State tách biệt cho mỗi field
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
@@ -32,7 +31,6 @@ const Register = () => {
     const [webURL, setWebURL] = useState("");
     const [avatar, setAvatar] = useState(null);
 
-    // ✅ Error state tách biệt
     const [errors, setErrors] = useState({});
 
     const pickImage = async () => {
@@ -75,7 +73,6 @@ const Register = () => {
                     form.append(imageKey, imageUrl);
                 }
 
-                // Chọn endpoint
                 let url = "";
                 if (role === "APPLICANT") {
                     url = endpoints['register-applicant'];
@@ -147,7 +144,6 @@ const Register = () => {
                     </TouchableOpacity>
 
                     <View style={RegisterStyle.form}>
-                        {/* ✅ Dùng onChangeText với setter trực tiếp */}
                         <UnifiedTextInput
                             label="Họ"
                             value={lastName}

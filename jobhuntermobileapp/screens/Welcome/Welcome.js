@@ -5,9 +5,7 @@ import styles from './WelcomeStyle';
 const Welcome = ({ navigation }) => {
     return (
         <View style={styles.container}>
-            {/* Header: Hình ảnh */}
             <View style={styles.headerContainer}>
-                {/* Thay thế 'icon.png' bằng hình minh họa vector/illustration của bạn nếu có */}
                 <Image
                     source={require('../../assets/logo.png')}
                     style={styles.logo}
@@ -20,12 +18,9 @@ const Welcome = ({ navigation }) => {
                 </View>
             </View>
 
-            {/* Body: Tiêu đề & Giới thiệu */}
 
 
-            {/* Footer: Các nút hành động */}
             <View style={styles.footerContainer}>
-                {/* Nút 1: Khám phá (Vào App chế độ Khách) */}
                 <TouchableOpacity
                     style={styles.btnPrimary}
                     onPress={() => navigation.navigate('Home')}
@@ -33,9 +28,8 @@ const Welcome = ({ navigation }) => {
                     <Text style={styles.btnPrimaryText}>Khám phá ứng dụng</Text>
                 </TouchableOpacity>
 
-                {/* Nút 2: Đăng nhập */}
                 <TouchableOpacity
-                    style={[styles.btnSecondary, { backgroundColor: '#E3F2FD' }]} // Xanh nhạt
+                    style={[styles.btnSecondary, { backgroundColor: '#E3F2FD' }]} 
                     onPress={() => navigation.navigate('Login')}
                 >
                     <Text style={[styles.btnSecondaryText, { color: '#1976D2' }]}>Đăng nhập</Text>

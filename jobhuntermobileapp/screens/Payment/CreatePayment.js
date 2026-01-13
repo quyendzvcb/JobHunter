@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, ScrollView, Alert, Linking, StyleSheet } from 'react-native';
 import { Text, Card, Button, ActivityIndicator, RadioButton, Divider } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -6,23 +6,22 @@ import { authApis, endpoints } from '../../utils/Apis';
 import RenderHTML from "react-native-render-html";
 import { useWindowDimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MyUserContext } from '../../utils/contexts/MyUserContext';
 
 const CreatePayment = ({ route, navigation }) => {
     const { packageId, jobId } = route.params;
     const [packageDetail, setPackageDetail] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [paymentMethod, setPaymentMethod] = useState(''); // State lưu ID phương thức được chọn
+    const [paymentMethod, setPaymentMethod] = useState('');
     const [processing, setProcessing] = useState(false);
     const { width } = useWindowDimensions();
-
-    console.log(packageId)
+    const [, dispatch] = useContext(MyUserContext);
 
     useEffect(() => {
         const loadPackageDetail = async () => {
             try {
                 const token = await AsyncStorage.getItem('token');
                 const res = await authApis(token).get(endpoints['package-detail'](packageId));
-                console.log(res)
                 setPackageDetail(res.data);
                 if (res.data.payment_methods && res.data.payment_methods.length > 0) {
                     setPaymentMethod(res.data.payment_methods[0].id);
@@ -37,6 +36,21 @@ const CreatePayment = ({ route, navigation }) => {
         };
         loadPackageDetail();
     }, [packageId]);
+
+    const refreshUserProfile = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const res = await authApis(token).get(endpoints['current-user']);
+
+            dispatch({
+                type: "login",
+                payload: res.data
+            });
+            console.log("User profile updated!");
+        } catch (error) {
+            console.error("Lỗi cập nhật profile:", error);
+        }
+    };
 
     const handlePayment = async () => {
         if (!packageDetail || !paymentMethod) {
@@ -56,11 +70,7 @@ const CreatePayment = ({ route, navigation }) => {
                 job_id: jobId
             });
 
-
-            // Xử lý link thanh toán trả về (cho Momo, ZaloPay, v.v.)
             const payUrl = res.data.payUrl || res.data.payment_url;
-
-            console.log(payUrl)
 
             if (payUrl) {
                 const supported = await Linking.canOpenURL(payUrl);
@@ -73,7 +83,10 @@ const CreatePayment = ({ route, navigation }) => {
                             { text: "Để sau", style: 'cancel' },
                             {
                                 text: "Đã thanh toán",
-                                onPress: () => navigation.navigate("PaymentHistory")
+                                onPress: async () => {
+                                    await refreshUserProfile();
+                                    navigation.navigate("PaymentHistory");
+                                }
                             }
                         ]
                     );
@@ -110,7 +123,6 @@ const CreatePayment = ({ route, navigation }) => {
                         <Text variant="headlineSmall" style={styles.headerTitle}>Xác nhận thanh toán</Text>
                     </View>
 
-                    {/* Thông tin gói dịch vụ */}
                     <Card style={styles.card}>
                         <Card.Title title="Thông tin gói dịch vụ" titleStyle={styles.cardTitle} />
                         <Card.Content>
@@ -127,7 +139,6 @@ const CreatePayment = ({ route, navigation }) => {
                         </Card.Content>
                     </Card>
 
-                    {/* Chọn phương thức thanh toán (Render ĐỘNG từ API) */}
                     <Card.Content>
                         {packageDetail.payment_methods && packageDetail.payment_methods.length > 0 ? (
                             <RadioButton.Group onValueChange={value => setPaymentMethod(value)} value={paymentMethod}>
@@ -181,21 +192,85 @@ const CreatePayment = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5', padding: 15 },
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    header: { marginBottom: 15 },
-    headerTitle: { fontWeight: 'bold', color: '#2563eb' },
-    card: { marginBottom: 15, backgroundColor: 'white', borderRadius: 12, elevation: 2 },
-    cardTitle: { color: '#444', fontWeight: 'bold' },
-    pkgName: { fontSize: 20, fontWeight: 'bold', color: '#333' },
-    price: { color: '#D82D8B', fontWeight: 'bold', marginVertical: 10 },
-    htmlContainer: { marginTop: 5 },
-    radioItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 5 },
-    methodInfo: { marginLeft: 10, flex: 1 },
-    methodText: { fontSize: 16, fontWeight: '600' },
-    subText: { fontSize: 12, color: 'gray' },
-    footer: { marginBottom: 30, marginTop: 10 },
-    btnPay: { backgroundColor: '#2563eb', borderRadius: 8 },
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f5f5',
+        padding: 15,
+    },
+
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    header: {
+        marginBottom: 15,
+    },
+
+    headerTitle: {
+        fontWeight: 'bold',
+        color: '#2563eb',
+    },
+
+    card: {
+        marginBottom: 15,
+        backgroundColor: 'white',
+        borderRadius: 12,
+        elevation: 2,
+    },
+
+    cardTitle: {
+        color: '#444',
+        fontWeight: 'bold',
+    },
+
+    pkgName: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+
+    price: {
+        color: '#D82D8B',
+        fontWeight: 'bold',
+        marginVertical: 10,
+    },
+
+    htmlContainer: {
+        marginTop: 5,
+    },
+
+    radioItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 5,
+    },
+
+    methodInfo: {
+        marginLeft: 10,
+        flex: 1,
+    },
+
+    methodText: {
+        fontSize: 16,
+        fontWeight: '600',
+    },
+
+    subText: {
+        fontSize: 12,
+        color: 'gray',
+    },
+
+    footer: {
+        marginTop: 10,
+        marginBottom: 30,
+    },
+
+    btnPay: {
+        backgroundColor: '#2563eb',
+        borderRadius: 8,
+    },
 });
 
 export default CreatePayment;

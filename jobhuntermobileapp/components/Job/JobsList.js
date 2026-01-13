@@ -22,11 +22,9 @@ const JobsList = ({
     const [refreshing, setRefreshing] = useState(false);
     const [searchText, setSearchText] = useState('');
 
-    // Chặn gọi API 2 lần khi mới vào
     const isFocused = useIsFocused();
     const firstRender = useRef(true);
 
-    // Effect 1: Focus lại màn hình
     useEffect(() => {
         if (isFocused) {
             if (firstRender.current) {
@@ -37,7 +35,6 @@ const JobsList = ({
         }
     }, [isFocused]);
 
-    // Effect 2: Thay đổi bộ lọc
     useEffect(() => {
         if (!isRecruiter) {
             setPage(1);
@@ -45,7 +42,6 @@ const JobsList = ({
         }
     }, [isRecruiter ? null : JSON.stringify(filters)]);
 
-    // Effect 3: Tìm kiếm
     useEffect(() => {
         let timer = setTimeout(() => {
             if (page > 0) {
@@ -56,7 +52,6 @@ const JobsList = ({
         return () => clearTimeout(timer);
     }, [searchText]);
 
-    // --- HÀM GỌI API ---
     const loadJobs = async (pageNum = 1) => {
         if (pageNum === 0) return;
 
@@ -77,7 +72,6 @@ const JobsList = ({
                     if (filters.category_id) url += `&category_id=${filters.category_id}`;
                     if (filters.salary_min) url += `&salary_min=${filters.salary_min}`;
 
-                    // Gửi mảng location_id lên Backend (Backend dùng params.getlist để nhận)
                     if (filters.location_id && Array.isArray(filters.location_id)) {
                         filters.location_id.forEach(id => {
                             url += `&location_id=${id}`;
@@ -89,7 +83,6 @@ const JobsList = ({
             console.log("Calling API:", url);
             const res = await api.get(url);
 
-            // --- CẬP NHẬT STATE (Không cần lọc trùng nữa vì Backend đã lo) ---
             if (pageNum === 1) {
                 setJobs(res.data.results);
             } else {
@@ -106,7 +99,7 @@ const JobsList = ({
             if (ex.response && ex.response.status === 404) {
                 setPage(0);
             } else {
-                console.error("Load Jobs Error:", ex);
+                console.log("Load Jobs Error:", ex);
             }
         } finally {
             setLoading(false);
@@ -189,17 +182,57 @@ const JobsList = ({
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7FA', marginTop: 30 },
-    header: { padding: 10, backgroundColor: 'white', elevation: 2 },
-    searchBar: { backgroundColor: '#f0f0f0', borderRadius: 10 },
-    toolsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 },
-    toolBtn: { borderColor: '#ddd', borderRadius: 20 },
-    sortBtn: { flexDirection: 'row', alignItems: 'center', padding: 8 },
-    emptyText: { textAlign: 'center', marginTop: 20, color: '#888' },
+    container: {
+        flex: 1,
+        backgroundColor: '#F5F7FA',
+        marginTop: 30,
+    },
+
+    header: {
+        padding: 10,
+        backgroundColor: 'white',
+        elevation: 2,
+    },
+
+    searchBar: {
+        backgroundColor: '#f0f0f0',
+        borderRadius: 10,
+    },
+
+    toolsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 10,
+    },
+
+    toolBtn: {
+        borderColor: '#ddd',
+        borderRadius: 20,
+    },
+
+    sortBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 8,
+    },
+
+    emptyText: {
+        textAlign: 'center',
+        marginTop: 20,
+        color: '#888',
+    },
+
     loadingOverlay: {
-        position: 'absolute', top: 150, left: 0, right: 0, bottom: 0,
-        justifyContent: 'flex-start', alignItems: 'center', zIndex: 999
-    }
+        position: 'absolute',
+        top: 150,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        zIndex: 999,
+    },
 });
 
 export default JobsList;

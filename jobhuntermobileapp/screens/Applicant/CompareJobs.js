@@ -8,11 +8,10 @@ const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = width * 0.40;
 const LABEL_WIDTH = 95;
 
-// Định nghĩa chiều cao cố định cho các hàng để đảm bảo sự đồng bộ giữa cột tiêu đề và cột dữ liệu
 const HEIGHTS = {
-    HEADER: 180, // Chiều cao phần tên công việc & nút bấm
-    COMMON: 70,  // Chiều cao các dòng thông thường (Lương, địa điểm...)
-    HTML: 160    // Chiều cao các dòng nội dung dài (Yêu cầu, phúc lợi)
+    HEADER: 180,
+    COMMON: 70,
+    HTML: 160
 };
 
 const CompareJobs = ({ navigation, route }) => {
@@ -97,7 +96,6 @@ const CompareJobs = ({ navigation, route }) => {
     // 2. Render Cột Dữ liệu (Cho 1 Job)
     const renderJobColumn = (job) => (
         <View key={job.id} style={{ width: COLUMN_WIDTH }}>
-            {/* Header Cell: Job Info */}
             <View style={[styles.cell, styles.jobHeaderCell, { height: HEIGHTS.HEADER }]}>
                 <TouchableOpacity onPress={() => removeJob(job.id)} style={styles.removeBtn}>
                     <Text style={styles.removeBtnText}>×</Text>
@@ -114,31 +112,24 @@ const CompareJobs = ({ navigation, route }) => {
                 </TouchableOpacity>
             </View>
 
-            {/* Data Cells - Cần đúng thứ tự và chiều cao như Label Column */}
-
-            {/* Lương */}
             <View style={[styles.cell, { height: HEIGHTS.COMMON, backgroundColor: getRowColor(0) }]}>
                 <Text style={[styles.text, styles.highlightText]}>{job.salary || "Thỏa thuận"}</Text>
             </View>
 
-            {/* Địa điểm */}
             <View style={[styles.cell, { height: HEIGHTS.COMMON, backgroundColor: getRowColor(1) }]}>
                 <Text style={styles.text}>
                     {job.location_details?.map(l => l.city).join(', ') || "Toàn quốc"}
                 </Text>
             </View>
 
-            {/* Kinh nghiệm */}
             <View style={[styles.cell, { height: HEIGHTS.COMMON, backgroundColor: getRowColor(2) }]}>
                 <Text style={styles.text}>{job.years_of_experience} năm</Text>
             </View>
 
-            {/* Hạn nộp */}
             <View style={[styles.cell, { height: HEIGHTS.COMMON, backgroundColor: getRowColor(3) }]}>
                 <Text style={styles.text}>{job.deadline}</Text>
             </View>
 
-            {/* Yêu cầu (HTML) */}
             <View style={[styles.cell, { height: HEIGHTS.HTML, backgroundColor: getRowColor(4) }]}>
                 <View style={styles.htmlContainer}>
                     <RenderHtml
@@ -150,7 +141,6 @@ const CompareJobs = ({ navigation, route }) => {
                 </View>
             </View>
 
-            {/* Phúc lợi (HTML) */}
             <View style={[styles.cell, { height: HEIGHTS.HTML, backgroundColor: getRowColor(5), borderBottomWidth: 0 }]}>
                 <View style={styles.htmlContainer}>
                     <RenderHtml
@@ -175,10 +165,8 @@ const CompareJobs = ({ navigation, route }) => {
             <ScrollView style={styles.body} contentContainerStyle={{ paddingBottom: 40 }}>
                 <View style={{ flexDirection: 'row' }}>
 
-                    {/* 1. Sticky Left Column */}
                     {renderLabelColumn()}
 
-                    {/* 2. Unified Horizontal ScrollView for Data */}
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         {jobs.map(job => renderJobColumn(job))}
                     </ScrollView>
@@ -190,70 +178,153 @@ const CompareJobs = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F0F2F5', marginTop: 35 },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    header: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        padding: 16, backgroundColor: '#fff',
-        borderBottomWidth: 1, borderColor: '#E5E7EB', elevation: 2
+    container: {
+        flex: 1,
+        backgroundColor: '#F0F2F5',
+        marginTop: 35,
     },
-    headerTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },
-    body: { flex: 1 },
 
-    // Styles cho Cột Tiêu đề
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 16,
+        backgroundColor: '#fff',
+        borderBottomWidth: 1,
+        borderColor: '#E5E7EB',
+        elevation: 2,
+    },
+
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#111827',
+    },
+
+    body: {
+        flex: 1,
+    },
+
     labelColumnContainer: {
         width: LABEL_WIDTH,
         backgroundColor: '#fff',
         borderRightWidth: 1,
         borderColor: '#E5E7EB',
         zIndex: 10,
-        elevation: 5, // Tạo bóng đổ đè lên phần lướt ngang
-        shadowColor: "#000",
+        elevation: 5,
+        shadowColor: '#000',
         shadowOffset: { width: 2, height: 0 },
         shadowOpacity: 0.1,
         shadowRadius: 3,
     },
-    labelText: { fontWeight: '600', color: '#6B7280', fontSize: 12, textTransform: 'uppercase', textAlign: 'center' },
 
-    // Styles chung cho Cell
+    labelText: {
+        fontWeight: '600',
+        color: '#6B7280',
+        fontSize: 12,
+        textTransform: 'uppercase',
+        textAlign: 'center',
+    },
+
     cell: {
         borderBottomWidth: 1,
         borderColor: '#E5E7EB',
         padding: 10,
         justifyContent: 'center',
-        alignItems: 'center' // Căn giữa nội dung
+        alignItems: 'center',
     },
 
-    // Styles riêng cho Job Column
     jobHeaderCell: {
         backgroundColor: '#fff',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingVertical: 15,
-        borderBottomWidth: 2 // Viền đậm hơn cho header
+        borderBottomWidth: 2,
     },
-    jobTitle: { fontWeight: '700', fontSize: 14, textAlign: 'center', color: '#1F2937', marginBottom: 4 },
-    companyName: { fontSize: 12, color: '#6B7280', marginBottom: 10, textAlign: 'center' },
 
-    text: { fontSize: 13, color: '#374151', textAlign: 'center' },
-    highlightText: { color: '#DC2626', fontWeight: '700', fontSize: 14 },
+    jobTitle: {
+        fontWeight: '700',
+        fontSize: 14,
+        textAlign: 'center',
+        color: '#1F2937',
+        marginBottom: 4,
+    },
 
-    // Buttons
-    removeBtn: { alignSelf: 'flex-end', padding: 5, position: 'absolute', top: 5, right: 5, zIndex: 1 },
-    removeBtnText: { color: '#9CA3AF', fontSize: 20 },
+    companyName: {
+        fontSize: 12,
+        color: '#6B7280',
+        marginBottom: 10,
+        textAlign: 'center',
+    },
+
+    text: {
+        fontSize: 13,
+        color: '#374151',
+        textAlign: 'center',
+    },
+
+    highlightText: {
+        color: '#DC2626',
+        fontWeight: '700',
+        fontSize: 14,
+    },
+
+    removeBtn: {
+        position: 'absolute',
+        top: 5,
+        right: 5,
+        padding: 5,
+        zIndex: 1,
+        alignSelf: 'flex-end',
+    },
+
+    removeBtnText: {
+        color: '#9CA3AF',
+        fontSize: 20,
+    },
+
     applyBtn: {
-        backgroundColor: '#2962FF', paddingHorizontal: 15, paddingVertical: 6,
-        borderRadius: 20, width: '90%', alignItems: 'center'
+        backgroundColor: '#2962FF',
+        paddingHorizontal: 15,
+        paddingVertical: 6,
+        borderRadius: 20,
+        width: '90%',
+        alignItems: 'center',
     },
-    applyBtnText: { color: 'white', fontSize: 12, fontWeight: '600' },
 
-    // HTML Content
-    htmlContainer: { width: '100%', height: '100%', overflow: 'hidden' },
-    readMoreOverlay: {
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: 20,
-        backgroundColor: 'rgba(255,255,255,0.8)', alignItems: 'center', justifyContent: 'center'
+    applyBtnText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: '600',
     },
-    readMoreText: { color: '#2962FF', fontSize: 10 }
+
+    htmlContainer: {
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+    },
+
+    readMoreOverlay: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 20,
+        backgroundColor: 'rgba(255,255,255,0.8)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    readMoreText: {
+        color: '#2962FF',
+        fontSize: 10,
+    },
 });
 
 export default CompareJobs;

@@ -30,7 +30,7 @@ export default StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 20,
-        // Đổ bóng cho logo icon
+
         shadowColor: PRIMARY_BLUE,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,

@@ -8,13 +8,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MyUserContext } from "../../utils/contexts/MyUserContext";
 import { authApis, endpoints } from "../../utils/Apis";
 import JobsList from "../../components/Job/JobsList";
+import styles from "./Styles";
 
 const RecruiterHome = () => {
     const [user] = useContext(MyUserContext);
     const nav = useNavigation();
     const isFocused = useIsFocused();
 
-    // --- State Thống kê ---
     const currentYear = new Date().getFullYear();
     const yearsList = Array.from({ length: 5 }, (_, i) => currentYear - i);
     const [year, setYear] = useState(currentYear);
@@ -31,7 +31,6 @@ const RecruiterHome = () => {
             const data = res.data.chart_data || [];
             setStatsData(data);
 
-            // Tính toán Overview (như cũ)
             if (data.length > 0) {
                 const views = data.reduce((s, i) => s + (i.total_views || 0), 0);
                 const applies = data.reduce((s, i) => s + (i.total_applies || 0), 0);
@@ -49,13 +48,11 @@ const RecruiterHome = () => {
             loadStats();
     }, [isFocused, loadStats]);
 
-    // --- Định nghĩa Header (Thống kê) để truyền vào JobsList ---
     const renderStatsHeader = () => {
         const formatLabel = (d) => period === 'month' ? `T${new Date(d).getMonth() + 1}` : `Q${Math.floor(new Date(d).getMonth() / 3) + 1}`;
 
         return (
             <View>
-                {/* Header Xanh & User Info */}
                 <View style={styles.header}>
                     <View style={styles.headerTop}>
                         <View>
@@ -73,7 +70,6 @@ const RecruiterHome = () => {
                     </View>
                 </View>
 
-                {/* Bảng Thống Kê */}
                 <View style={styles.bodyHeader}>
                     <Card style={styles.tableCard} elevation={1}>
                         <View style={styles.filterToolbar}>
@@ -113,13 +109,12 @@ const RecruiterHome = () => {
 
     return (
         <View style={styles.container}>
-            {/* Sử dụng JobsList dùng chung */}
             <JobsList
                 isRecruiter={true}
                 navigation={nav}
                 headerComponent={renderStatsHeader()}
                 onRefreshExternal={loadStats}
-                filters={filters} 
+                filters={filters}
                 setFilters={setFilters}
             />
 
@@ -136,18 +131,5 @@ const StatCard = ({ icon, value, label, color }) => (
     </Surface>
 );
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7FA' },
-    header: { backgroundColor: '#1976D2', padding: 20, paddingBottom: 60 },
-    headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-    welcomeLabel: { color: '#BBDEFB', fontSize: 14 },
-    userName: { color: 'white', fontSize: 20, fontWeight: 'bold' },
-    statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10, marginBottom: -80 },
-    bodyHeader: { padding: 16, marginTop: 40 },
-    tableCard: { backgroundColor: 'white', borderRadius: 12, paddingVertical: 10, marginBottom: 15 },
-    filterToolbar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 15, marginBottom: 10 },
-    sectionTitle: { fontWeight: 'bold', fontSize: 16, marginBottom: 5, color: '#333' },
-    fab: { position: 'absolute', right: 20, bottom: 20, backgroundColor: '#1976D2' }
-});
 
 export default RecruiterHome;

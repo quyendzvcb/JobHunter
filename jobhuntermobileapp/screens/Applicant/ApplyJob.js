@@ -72,13 +72,13 @@ const ApplyJob = ({ route, navigation }) => {
             }
 
         } catch (error) {
-            console.error("Lỗi gửi đơn:", error);
+            console.log("Lỗi gửi đơn:", error);
             Alert.alert("Lỗi", "Bạn đã nộp đơn ứng tuyển cho công việc này rồi");
         } finally {
             setLoading(false);
         }
     };
-
+    console.log(newFile)
     return (
         <ScrollView style={styles.container}
             keyboardShouldPersistTaps="handled">
@@ -89,9 +89,9 @@ const ApplyJob = ({ route, navigation }) => {
                     <View style={styles.fileSelectedBox}>
                         <Image source={{ uri: newFile.uri }} style={{ width: 50, height: 50, borderRadius: 4, marginRight: 10 }} />
                         <View style={{ flex: 1 }}>
-                            <Text numberOfLines={1} style={{ fontWeight: 'bold' }}>{newFile.name}</Text>
+                            <Text numberOfLines={1} style={{ fontWeight: 'bold' }}>{newFile.fileName}</Text>
                             <Text style={{ fontSize: 12, color: 'gray' }}>
-                                {newFile.size > 0 ? (newFile.size / 1024 / 1024).toFixed(2) + ' MB' : 'Image File'}
+                                {newFile.fileSize > 0 ? (newFile.fileSize / 1024 / 1024).toFixed(2) + ' MB' : 'Image File'}
                             </Text>
                         </View>
                         <TouchableOpacity onPress={() => setNewFile(null)}>
@@ -110,13 +110,12 @@ const ApplyJob = ({ route, navigation }) => {
                     </Button>
                 )}
                 <HelperText type="info" style={styles.helper}>
-                    Hỗ trợ: .jpg, .png, .jpeg (Max 5MB)
+                    Hỗ trợ: .jpg, .png, .jpeg (Max 20MB)
                 </HelperText>
             </View>
 
             <Text style={styles.sectionTitle}>Thông Tin Cá Nhân</Text>
 
-            {/* ✅ onChangeText với setter trực tiếp */}
             <UnifiedTextInput
                 label="Họ và tên *"
                 value={fullName}
@@ -167,10 +166,30 @@ const ApplyJob = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fff', padding: 16 },
-    sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 20, marginBottom: 10, color: '#1f2937' },
-    uploadArea: { marginBottom: 10 },
-    fileBtn: { borderColor: '#2563eb', borderStyle: 'dashed', borderWidth: 1 },
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        padding: 16,
+    },
+
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginTop: 20,
+        marginBottom: 10,
+        color: '#1f2937',
+    },
+
+    uploadArea: {
+        marginBottom: 10,
+    },
+
+    fileBtn: {
+        borderColor: '#2563eb',
+        borderStyle: 'dashed',
+        borderWidth: 1,
+    },
+
     fileSelectedBox: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -178,12 +197,31 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0f9ff',
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#bae6fd'
+        borderColor: '#bae6fd',
     },
-    helper: { paddingHorizontal: 0, marginTop: 4, fontStyle: 'italic' },
-    input: { marginBottom: 15, backgroundColor: '#fff' },
-    subHint: { fontSize: 14, marginBottom: 8, color: '#6b7280' },
-    submitBtn: { marginTop: 30, backgroundColor: '#2563eb', borderRadius: 8 },
+
+    helper: {
+        paddingHorizontal: 0,
+        marginTop: 4,
+        fontStyle: 'italic',
+    },
+
+    input: {
+        marginBottom: 15,
+        backgroundColor: '#fff',
+    },
+
+    subHint: {
+        fontSize: 14,
+        marginBottom: 8,
+        color: '#6b7280',
+    },
+
+    submitBtn: {
+        marginTop: 30,
+        backgroundColor: '#2563eb',
+        borderRadius: 8,
+    },
 });
 
 export default ApplyJob;

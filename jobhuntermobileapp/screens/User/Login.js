@@ -44,7 +44,7 @@ const Login = () => {
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={LoginStyle.container}>
             <ScrollView
                 contentContainerStyle={[LoginStyle.scrollContent, { marginTop: 80 }]}
-                keyboardShouldPersistTaps="handled" // Fix lỗi chạm iOS
+                keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
             >
                 <View style={LoginStyle.content}>

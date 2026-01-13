@@ -45,14 +45,13 @@ const JobDetail = ({ route, navigation }) => {
                     { text: "Hủy", style: "cancel" },
                     {
                         text: "Đăng nhập ngay",
-                        onPress: () => navigation.navigate("Login") // Đảm bảo route tên là "Login"
+                        onPress: () => navigation.navigate("Login")
                     }
                 ]
             );
             return;
         }
 
-        // 2. Nếu đã đăng nhập thì chuyển sang trang nộp đơn
         navigation.navigate("ApplyJob", { jobId: job.id });
     };
 
@@ -95,7 +94,7 @@ const JobDetail = ({ route, navigation }) => {
             );
 
         } catch (e) {
-            console.error("Lỗi addToCompare:", e);
+            console.log("Lỗi addToCompare:", e);
             Alert.alert("Lỗi", "Không thể lưu vào danh sách so sánh.");
         }
     };
@@ -105,7 +104,6 @@ const JobDetail = ({ route, navigation }) => {
     return (
         <View style={{ flex: 1, backgroundColor: 'white' }}>
             <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-                {/* Header ảnh bìa */}
                 <View style={styles.header}>
                     <Avatar.Image size={80} source={{ uri: job.recruiter_detail?.logo }} style={{ backgroundColor: 'white' }} />
                 </View>
@@ -134,7 +132,6 @@ const JobDetail = ({ route, navigation }) => {
                 </View>
             </ScrollView>
             <View style={styles.bottomBar}>
-                {/* Nút So sánh (Màu cam/vàng để phân biệt) */}
                 <Button
                     mode="outlined"
                     icon="scale-balance"
@@ -146,13 +143,11 @@ const JobDetail = ({ route, navigation }) => {
                 </Button>
 
                 <View style={{ marginTop: 10 }} />
-
-                {/* Nút Ứng tuyển */}
                 <Button
                     mode="contained"
                     icon="send"
                     style={[styles.btnAction, { backgroundColor: '#1976D2' }]}
-                    onPress={handleApply} // Dùng lại hàm cũ của bạn
+                    onPress={handleApply}
                 >
                     Ứng tuyển
                 </Button>
@@ -176,15 +171,45 @@ const InfoRow = ({ label, value }) => (
 );
 
 const styles = StyleSheet.create({
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    header: { height: 120, backgroundColor: '#E3F2FD', justifyContent: 'center', alignItems: 'center', marginBottom: 40 },
-    content: { paddingHorizontal: 20 },
-    title: { fontWeight: 'bold', color: '#1976D2' },
-    bottomBar: {
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        backgroundColor: 'white', padding: 15, elevation: 10, borderTopWidth: 1, borderColor: '#eee'
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    applyBtn: { paddingVertical: 5, backgroundColor: '#1976D2' }
+
+    header: {
+        height: 120,
+        backgroundColor: '#E3F2FD',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 40,
+    },
+
+    content: {
+        paddingHorizontal: 20,
+    },
+
+    title: {
+        fontWeight: 'bold',
+        color: '#1976D2',
+    },
+
+    bottomBar: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'white',
+        padding: 15,
+        elevation: 10,
+        borderTopWidth: 1,
+        borderColor: '#eee',
+    },
+
+    applyBtn: {
+        paddingVertical: 5,
+        backgroundColor: '#1976D2',
+    },
 });
 
 export default JobDetail;

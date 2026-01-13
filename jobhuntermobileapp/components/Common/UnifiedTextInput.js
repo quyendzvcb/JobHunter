@@ -30,7 +30,6 @@ const UnifiedTextInput = ({
     ) : null;
 
     const handleChangeText = (text) => {
-        // Fix: Không convert thành String nếu đã là string
         if (onChangeText) {
             onChangeText(text);
         }
@@ -84,7 +83,6 @@ const UnifiedTextInput = ({
                 autoCapitalize="none"
                 autoCorrect={false}
                 spellCheck={false}
-                // FIX TIẾNG VIỆT
                 allowFontScaling={false}
                 scrollEnabled={false}
                 textAlignVertical="center"

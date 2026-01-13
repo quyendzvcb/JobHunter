@@ -76,10 +76,27 @@ const PaymentHistory = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    card: { marginBottom: 10, backgroundColor: 'white' },
-    row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f5f5',
+    },
+
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    card: {
+        marginBottom: 10,
+        backgroundColor: 'white',
+    },
+
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
 });
 
 export default PaymentHistory;
