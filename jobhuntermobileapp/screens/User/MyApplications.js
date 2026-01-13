@@ -18,6 +18,7 @@ const MyApplications = () => {
     const [loading, setLoading] = useState(false);
     const [selectedTab, setSelectedTab] = useState('PENDING');
 
+
     const isFocused = useIsFocused();
     const nav = useNavigation();
 
@@ -68,13 +69,24 @@ const MyApplications = () => {
     const renderRecruiterItem = ({ item }) => {
         const applicantName = `${item.applicant_detail?.full_name}`;
         const phone = item.applicant_detail?.phone_number || "Chưa cập nhật SĐT";
+        const isPremium = item.applicant_detail?.is_premium || ''
 
         return (
             <TouchableOpacity
                 activeOpacity={0.9}
                 onPress={() => nav.navigate("ApplicationDetail", { application: item })}
             >
-                <Card style={styles.card}>
+                <Card style={[
+                    styles.card,
+                    isPremium && styles.premiumCardBorder
+                ]}>
+
+                    {/* Nhãn Premium góc nhỏ */}
+                    {isPremium && (
+                        <View style={styles.premiumBadge}>
+                            <MaterialCommunityIcons name="crown" size={10} color="white" />
+                        </View>
+                    )}
                     <Card.Content>
                         <View style={styles.row}>
                             <View style={{ marginLeft: 12, flex: 1 }}>
@@ -192,6 +204,28 @@ const styles = StyleSheet.create({
     row: { flexDirection: 'row', alignItems: 'center' },
     boldText: { fontWeight: 'bold', fontSize: 16, color: '#333' },
     dateText: { fontSize: 12, color: '#888', marginTop: 2 },
+    premiumCardBorder: {
+        backgroundColor: '#FFFDF0', // Nền vàng cực nhạt để nổi bật
+    },
+    premiumBadge: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        backgroundColor: '#FFD700',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderTopRightRadius: 10,
+        borderBottomLeftRadius: 10,
+        zIndex: 1,
+    },
+    premiumBadgeText: {
+        color: 'white',
+        fontSize: 8,
+        fontWeight: 'bold',
+        marginLeft: 2,
+    },
 });
 
 export default MyApplications;

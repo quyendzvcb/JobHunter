@@ -104,20 +104,29 @@ class JobViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVie
     @action(methods=['get'], detail=False, url_path='compare')
     def compare_jobs(self, request):
         ids = request.query_params.get('ids', '')
-        id_list = [int(x) for x in ids.split(',') if x.isdigit()]
+        if not ids:
+            return Response({"error": "Không có dữ liệu để so sánh"}, status=400)
+        try:
+            id_list = [int(x.strip()) for x in ids.split(',') if x.strip().isdigit()]
+        except Exception:
+            return Response({"error": "ID không hợp lệ"}, status=400)
+        id_list = list(set(id_list))
         if len(id_list) > 5:
-            return Response(
-                {"error": "Chỉ được so sánh tối đa 5 công việc"},
-                status=400
-        )
+            return Response({"error": "Chỉ được so sánh tối đa 5 công việc"}, status=400)
         elif len(id_list) < 2:
+            return Response({"error": "Cần chọn ít nhất 2 công việc để so sánh"}, status=400)
+        jobs = Job.objects.filter(id__in=id_list, is_active=True)\
+                          .select_related('recruiter', 'category')\
+                          .prefetch_related('location')
+        if jobs.count() < 2:
             return Response(
-                {"error": "Cần chọn ít nhất 2 công việc để so sánh"},
-                status=400
+                {"error": "Một số công việc đã ngừng tuyển hoặc bị xóa. Không đủ dữ liệu so sánh."},
+                status=404
             )
-        jobs = Job.objects.filter(id__in=id_list)
-        return Response(serializers.JobDetailsSerializer(jobs, many=True).data)
+        jobs_dict = {job.id: job for job in jobs}
+        sorted_jobs = [jobs_dict[i] for i in id_list if i in jobs_dict]
 
+        return Response(serializers.JobDetailsSerializer(sorted_jobs, many=True).data)
 
 class ApplicationViewSet(viewsets.ViewSet, generics.ListAPIView):
     serializer_class = serializers.ApplicationSerializer

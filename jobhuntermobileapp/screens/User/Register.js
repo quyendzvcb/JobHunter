@@ -7,6 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import RegisterStyle from "./RegisterStyle";
 import Apis, { endpoints } from "../../utils/Apis";
 import UnifiedTextInput from "../../components/Common/UnifiedTextInput";
+import { uploadToCloudinary } from '../../components/Upload/CloudinaryUpload';
 
 const Register = () => {
     const nav = useNavigation();
@@ -62,22 +63,16 @@ const Register = () => {
             setLoading(true);
             try {
                 let form = new FormData();
-
-                // Append các trường cơ bản
                 form.append('first_name', firstName);
                 form.append('last_name', lastName);
                 form.append('username', username);
                 form.append('password', password);
                 form.append('email', email);
 
-                // Xử lý ảnh
                 if (avatar) {
+                    const imageUrl = await uploadToCloudinary(avatar);
                     const imageKey = role === 'RECRUITER' ? 'logo' : 'avatar';
-                    form.append(imageKey, {
-                        uri: avatar.uri,
-                        name: avatar.fileName || 'image.jpg',
-                        type: 'image/jpeg'
-                    });
+                    form.append('imageKey', imageUrl);
                 }
 
                 // Chọn endpoint

@@ -17,7 +17,7 @@ import ApplicantHome from "./screens/Applicant/ApplicantHome";
 import JobDetail from "./screens/Applicant/JobDetail";
 import Profile from "./screens/User/Profile";
 import ApplyJob from "./screens/Applicant/ApplyJob";
-import MyApplications from "./screens/Applicant/MyApplications";
+import MyApplications from "./screens/User/MyApplications";
 import RecruiterHome from "./screens/Recruiter/RecruiterHome";
 import JobEditor from "./screens/Recruiter/JobEditor";
 import AddJob from "./screens/Recruiter/AddJob";
@@ -25,22 +25,20 @@ import ApplicationDetail from "./screens/Recruiter/ApplicationDetail"
 import PackageList from "./screens/Payment/PackageList"
 import PaymentHistory from "./screens/Payment/PaymentHistory"
 import CreatePayment from './screens/Payment/CreatePayment';
+import CompareJobs from "./screens/Applicant/CompareJobs";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// --- CÁC STACK NAVIGATOR CON ---
-
-// 1. Stack Tìm việc (Dành cho Ứng viên)
 const JobSearchStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="ApplicantHome" component={ApplicantHome} options={{ headerShown: false }} />
-    <Stack.Screen name="JobDetail" component={JobDetail} options={{ title: "Chi tiết công việc" }} />
+    <Stack.Screen name="JobDetail" component={JobDetail} options={{ headerShown: false }} />
     <Stack.Screen name="ApplyJob" component={ApplyJob} options={{ title: "Ứng tuyển" }} />
+    <Stack.Screen name="CompareJobs" component={CompareJobs} options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 
-// 2. Stack Quản lý tin (Dành cho Recruiter)
 const RecruiterDashboardStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="RecruiterHome" component={RecruiterHome} options={{ headerShown: false }} />
@@ -49,7 +47,6 @@ const RecruiterDashboardStack = () => (
   </Stack.Navigator>
 );
 
-// 3. Stack Hoạt động (Dùng chung tên Stack nhưng component bên trong sẽ linh hoạt)
 const ActivityStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="ApplicationList" component={MyApplications} options={{ headerShown: false }} />
@@ -57,7 +54,6 @@ const ActivityStack = () => (
   </Stack.Navigator>
 );
 
-// 4. Stack Cá nhân (Dùng chung)
 const ProfileStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
@@ -67,7 +63,6 @@ const ProfileStack = () => (
   </Stack.Navigator>
 );
 
-// --- TAB NAVIGATOR CHÍNH (GỘP CHUNG) ---
 const MainTabNavigator = () => {
   const [user] = useContext(MyUserContext);
   const isRecruiter = user?.role === "RECRUITER";
@@ -87,10 +82,9 @@ const MainTabNavigator = () => {
         }}
       />
 
-      {/* TAB 2: HOẠT ĐỘNG (Ứng viên / Hồ sơ) */}
       <Tab.Screen
         name="ActivityTab"
-        component={ActivityStack} // Dùng chung ActivityStack vì MyApplications đã xử lý logic hiển thị bên trong rồi
+        component={ActivityStack}
         options={{
           title: isRecruiter ? "Ứng viên" : "Hồ sơ",
           tabBarIcon: ({ color }) => (
@@ -125,7 +119,6 @@ const App = () => {
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             {!user ? (
-              // Chưa đăng nhập
               <>
                 <Stack.Screen name="Welcome" component={Welcome} />
                 <Stack.Screen name="Login" component={Login} />
@@ -133,7 +126,6 @@ const App = () => {
                 <Stack.Screen name="Home" component={MainTabNavigator} />
               </>
             ) : (
-              // Đã đăng nhập -> Vào thẳng Tab chính
               <Stack.Screen name="Home" component={MainTabNavigator} />
             )}
           </Stack.Navigator>

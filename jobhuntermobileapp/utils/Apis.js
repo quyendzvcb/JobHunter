@@ -7,7 +7,7 @@ export const endpoints = {
     'locations': '/locations/',
     'jobs': (params) => `/jobs/${params ? '?' + params : ''}`,
     'job-detail': (jobId) => `/jobs/${jobId}/`,
-    'job-compare': (ids) => `/jobs/compare/?ids=${ids}`,
+    'job-compare': `/jobs/compare/`,
     'login': '/o/token/',
     'current-user': '/users/current-user/',
     'register-applicant': '/users/register/applicant/',

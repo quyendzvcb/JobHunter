@@ -13,7 +13,7 @@ export default StyleSheet.create({
     // Components
     card: { backgroundColor: 'white', marginBottom: 10, elevation: 2, borderRadius: 8 },
     input: { marginBottom: 15, backgroundColor: 'white' },
-    btnPrimary: { backgroundColor: '#1976D2', borderRadius: 8, marginVertical: 10 },
+    btnPrimary: { backgroundColor: '#1976D2', borderRadius: 8, marginVertical: 5 },
     btnOutline: { borderColor: '#1976D2', borderRadius: 8, marginVertical: 10 },
 
     // Helpers

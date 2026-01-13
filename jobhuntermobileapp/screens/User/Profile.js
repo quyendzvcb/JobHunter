@@ -2,19 +2,15 @@ import React, { useContext, useState } from "react";
 import { View, ScrollView, Alert, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Avatar, Text, Button, Chip, Card, Divider, ActivityIndicator, List } from "react-native-paper";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from "@react-navigation/native";
 
 import { MyUserContext } from "../../utils/contexts/MyUserContext";
 import MyStyles from "../../styles/MyStyles";
-import { authApis, endpoints } from "../../utils/Apis";
 
 const Profile = () => {
     const [user, dispatch] = useContext(MyUserContext);
     const nav = useNavigation();
-    const [loading, setLoading] = useState(false);
 
-    // Hàm xử lý đăng xuất
     const logout = () => {
         Alert.alert("Đăng xuất", "Bạn muốn đăng xuất?", [
             { text: "Hủy" },
@@ -22,66 +18,20 @@ const Profile = () => {
         ]);
     };
 
-    // Hàm xử lý nâng cấp Premium
-    const handleUpgrade = async () => {
-        Alert.alert(
-            "Nâng cấp Premium",
-            "Bạn có muốn nâng cấp lên tài khoản VIP với giá 500.000 VNĐ? \n\nQuyền lợi:\n- Huy hiệu VIP\n- Ưu tiên hiển thị hồ sơ\n- Xem được nhiều việc làm hơn",
-            [
-                { text: "Để sau", style: "cancel" },
-                {
-                    text: "Thanh toán & Nâng cấp",
-                    onPress: async () => {
-                        processUpgrade();
-                    }
-                }
-            ]
-        );
-    };
-
-    const processUpgrade = async () => {
-        setLoading(true);
-        try {
-            // 1. Gọi API thực tế (nếu có backend hỗ trợ)
-            const token = await AsyncStorage.getItem('token');
-            // Ví dụ: await authApis(token).post(endpoints['upgrade-premium']); 
-
-            // --- GIẢ LẬP LOGIC SERVER ---
-            // Ở đây mình giả lập gọi API thành công sau 1.5 giây
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // 2. Cập nhật Context (Local State)
-            // Tạo đối tượng user mới với trường is_premium = true
-            const updatedUser = { ...user, is_premium: true };
-
-            dispatch({
-                type: "login",
-                payload: updatedUser
-            });
-
-            Alert.alert("Thành công", "Chúc mừng! Bạn đã trở thành thành viên Premium.");
-
-        } catch (error) {
-            console.error(error);
-            Alert.alert("Lỗi", "Giao dịch thất bại. Vui lòng thử lại.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Giao diện khi chưa đăng nhập
     if (!user) {
         return (
             <View style={[MyStyles.container, MyStyles.center, { padding: 30 }]}>
                 <Image source={{ uri: "https://cdn-icons-png.flaticon.com/512/1077/1077114.png" }} style={{ width: 120, height: 120, opacity: 0.5, marginBottom: 20 }} />
                 <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>Bạn chưa đăng nhập</Text>
                 <View style={{ width: '100%' }}>
-                    <Button mode="contained" style={MyStyles.btnPrimary} onPress={() => nav.navigate("Login")}>ĐĂNG NHẬP</Button>
+                    <Button mode="contasined" style={MyStyles.btnPrimary} onPress={() => nav.navigate("Login")}><Text style={{color: 'white'}}>ĐĂNG NHẬP</Text></Button>
                     <Button mode="outlined" style={MyStyles.btnOutline} textColor="#1976D2" onPress={() => nav.navigate("Register")}>ĐĂNG KÝ</Button>
                 </View>
             </View>
         );
     }
+
+    console.log(user)
 
     return (
         <ScrollView style={MyStyles.container}>
@@ -89,16 +39,18 @@ const Profile = () => {
             <View style={styles.headerCard}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     {/* Avatar bên trái */}
-                    <View>
+                    <View style={styles.avatarWrapper}>
                         <Avatar.Image
                             size={70}
                             source={{ uri: user.avatar || user.recruiter?.logo || 'https://via.placeholder.com/150' }}
                             style={{ backgroundColor: '#e0e0e0' }}
                         />
-                        {/* Icon máy ảnh nhỏ (trang trí) */}
-                        <View style={styles.cameraIconBg}>
-                            <MaterialCommunityIcons name="camera" size={12} color="white" />
-                        </View>
+
+                        {user?.applicant?.is_premium && (
+                            <View style={styles.premiumCrownOverlay}>
+                                <MaterialCommunityIcons name="crown" size={16} color="white" />
+                            </View>
+                        )}
                     </View>
 
                     {/* Thông tin bên phải */}
@@ -107,27 +59,24 @@ const Profile = () => {
                             <Text style={styles.userName}>
                                 {user.role === 'RECRUITER' ? user.recruiter?.company_name : `${user.last_name} ${user.first_name}`}
                             </Text>
-                            {/* Logic hiển thị Vương Miện nếu là Premium */}
-                            {user.is_premium && (
-                                <MaterialCommunityIcons name="crown" size={20} color="#FFD700" style={{ marginLeft: 5 }} />
-                            )}
                         </View>
 
                         <Text style={styles.userCode}>Mã: {user.id} - @{user.username}</Text>
 
-                        {/* Nút Nâng cấp tài khoản (Chỉ hiện khi chưa Premium) */}
-                        {!user.is_premium ? (
-                            <TouchableOpacity
-                                style={styles.upgradeBtnSmall}
-                                onPress={() => nav.navigate('PackageList')} 
-                            >
-                                <MaterialCommunityIcons name="arrow-up-bold-circle" size={16} color="#4b5563" />
-                                <Text style={styles.upgradeText}>Nâng cấp tài khoản</Text>
-                            </TouchableOpacity>
-                        ) : (
-                            <View style={styles.premiumTag}>
-                                <Text style={{ color: '#b45309', fontWeight: 'bold', fontSize: 12 }}>Thành viên Premium</Text>
-                            </View>
+                        {user.role === 'APPLICANT' && (
+                            !user?.applicant?.is_premium ? (
+                                <TouchableOpacity
+                                    style={styles.upgradeBtnSmall}
+                                    onPress={() => nav.navigate('PackageList')}
+                                >
+                                    <MaterialCommunityIcons name="arrow-up-bold-circle" size={16} color="#4b5563" />
+                                    <Text style={styles.upgradeText}>Nâng cấp tài khoản</Text>
+                                </TouchableOpacity>
+                            ) : (
+                                <View style={styles.premiumTag}>
+                                    <Text style={{ color: '#b45309', fontWeight: 'bold', fontSize: 12 }}>Thành viên Premium</Text>
+                                </View>
+                            )
                         )}
                     </View>
                 </View>
@@ -225,7 +174,24 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 10,
         marginBottom: 10
-    }
+    },
+    avatarWrapper: {
+        position: 'relative',
+    },
+    premiumCrownOverlay: {
+        position: 'absolute',
+        top: -5,
+        left: -5,
+        backgroundColor: '#FFD700', // Màu vàng Gold
+        padding: 4,
+        borderRadius: 12,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+        zIndex: 10,
+    },
 });
 
 export default Profile;
