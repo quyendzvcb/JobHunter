@@ -24,7 +24,7 @@ const Profile = () => {
                 <Image source={{ uri: "https://cdn-icons-png.flaticon.com/512/1077/1077114.png" }} style={{ width: 120, height: 120, opacity: 0.5, marginBottom: 20 }} />
                 <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>Bạn chưa đăng nhập</Text>
                 <View style={{ width: '100%' }}>
-                    <Button mode="contasined" style={MyStyles.btnPrimary} onPress={() => nav.navigate("Login")}><Text style={{color: 'white'}}>ĐĂNG NHẬP</Text></Button>
+                    <Button mode="contasined" style={MyStyles.btnPrimary} onPress={() => nav.navigate("Login")}><Text style={{ color: 'white' }}>ĐĂNG NHẬP</Text></Button>
                     <Button mode="outlined" style={MyStyles.btnOutline} textColor="#1976D2" onPress={() => nav.navigate("Register")}>ĐĂNG KÝ</Button>
                 </View>
             </View>
@@ -61,7 +61,7 @@ const Profile = () => {
                             </Text>
                         </View>
 
-                        <Text style={styles.userCode}>Mã: {user.id} - @{user.username}</Text>
+                        <Text style={styles.userCode}>Username: @{user.username}</Text>
 
                         {user.role === 'APPLICANT' && (
                             !user?.applicant?.is_premium ? (

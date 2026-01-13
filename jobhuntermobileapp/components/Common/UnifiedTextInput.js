@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { View, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import { TextInput, HelperText } from 'react-native-paper';
 
@@ -19,6 +19,7 @@ const UnifiedTextInput = ({
     keyboardType = 'default',
     ...props
 }) => {
+    const inputRef = useRef(null);
     const safeValue = value !== null && value !== undefined ? String(value) : "";
 
     const renderLeft = icon ? (
@@ -28,6 +29,13 @@ const UnifiedTextInput = ({
         />
     ) : null;
 
+    const handleChangeText = (text) => {
+        // Fix: Không convert thành String nếu đã là string
+        if (onChangeText) {
+            onChangeText(text);
+        }
+    };
+
     if (onPress) {
         return (
             <View style={[styles.wrapper, wrapperStyle]}>
@@ -35,6 +43,7 @@ const UnifiedTextInput = ({
                     <View pointerEvents="none">
                         <TextInput
                             {...props}
+                            ref={inputRef}
                             label={label}
                             value={safeValue}
                             mode="outlined"
@@ -44,6 +53,7 @@ const UnifiedTextInput = ({
                             error={!!errorText}
                             outlineColor="#e5e7eb"
                             activeOutlineColor="#2563eb"
+                            cursorColor="#2563eb"
                         />
                     </View>
                 </TouchableOpacity>
@@ -56,9 +66,10 @@ const UnifiedTextInput = ({
         <View style={[styles.wrapper, wrapperStyle]}>
             <TextInput
                 {...props}
+                ref={inputRef}
                 label={label}
                 value={safeValue}
-                onChangeText={onChangeText}
+                onChangeText={handleChangeText}
                 secureTextEntry={secure}
                 multiline={multiline}
                 keyboardType={keyboardType}
@@ -69,9 +80,14 @@ const UnifiedTextInput = ({
                 error={!!errorText}
                 outlineColor="#e5e7eb"
                 activeOutlineColor="#2563eb"
+                cursorColor="#2563eb"
                 autoCapitalize="none"
                 autoCorrect={false}
                 spellCheck={false}
+                // FIX TIẾNG VIỆT
+                allowFontScaling={false}
+                scrollEnabled={false}
+                textAlignVertical="center"
             />
             {errorText ? (
                 <HelperText type="error" visible={true}>{errorText}</HelperText>
@@ -83,7 +99,10 @@ const UnifiedTextInput = ({
 };
 
 const styles = StyleSheet.create({
-    wrapper: { marginBottom: 12, width: '100%' }
+    wrapper: {
+        marginBottom: 12,
+        width: '100%'
+    }
 });
 
 export default UnifiedTextInput;

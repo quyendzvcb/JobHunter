@@ -141,9 +141,9 @@ class ApplicationViewSet(viewsets.ViewSet, generics.ListAPIView):
         if getattr(self, 'swagger_fake_view', False) or not user.is_authenticated:
             return Job.objects.none()
         if user.role == User.Role.RECRUITER:
-            return Application.objects.filter(job__recruiter__user=user).select_related('job', 'applicant__user')
+            return Application.objects.filter(job__recruiter__user=user).select_related('job', 'applicant__user').order_by('-applicant__is_premium', '-created_at')
         elif user.role == User.Role.APPLICANT:
-            return Application.objects.filter(applicant__user=user).select_related('job', 'job__recruiter')
+            return Application.objects.filter(applicant__user=user).select_related('job', 'job__recruiter').order_by('-created_at')
         return Application.objects.none()
 
     @action(methods=['post'], detail=False, url_path='apply')

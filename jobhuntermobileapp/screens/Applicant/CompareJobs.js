@@ -190,7 +190,7 @@ const CompareJobs = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F0F2F5', marginTop: 30 },
+    container: { flex: 1, backgroundColor: '#F0F2F5', marginTop: 35 },
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',

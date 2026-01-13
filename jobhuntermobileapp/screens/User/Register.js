@@ -72,7 +72,7 @@ const Register = () => {
                 if (avatar) {
                     const imageUrl = await uploadToCloudinary(avatar);
                     const imageKey = role === 'RECRUITER' ? 'logo' : 'avatar';
-                    form.append('imageKey', imageUrl);
+                    form.append(imageKey, imageUrl);
                 }
 
                 // Chọn endpoint

@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, ScrollView, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, ScrollView, StyleSheet, Alert, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { Text, Button, Card, Avatar, Divider } from 'react-native-paper';
 import moment from 'moment';
 import 'moment/locale/vi';
 import { MyUserContext } from '../../utils/contexts/MyUserContext';
 import Apis, { endpoints } from '../../utils/Apis';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import RenderHTML from "react-native-render-html";
 
 
 const JobDetail = ({ route, navigation }) => {
@@ -13,6 +14,8 @@ const JobDetail = ({ route, navigation }) => {
     const [job, setJob] = useState([])
     const [user] = useContext(MyUserContext);
     const [loading, setLoading] = useState(false);
+
+    const { width } = useWindowDimensions();
 
     const getLocationString = () => {
         if (job.location_details && job.location_details.length > 0) {
@@ -26,7 +29,6 @@ const JobDetail = ({ route, navigation }) => {
             try {
                 const res = await Apis.get(endpoints['job-detail'](job_id));
                 setJob(res.data)
-                console.log(res.data);
             } catch (ex) {
                 console.log(ex);
             }
@@ -102,7 +104,7 @@ const JobDetail = ({ route, navigation }) => {
     if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
 
     return (
-        <View style={{ flex: 1, backgroundColor: 'white', marginTop: 30 }}>
+        <View style={{ flex: 1, backgroundColor: 'white' }}>
             <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
                 {/* Header ảnh bìa */}
                 <View style={styles.header}>
@@ -117,9 +119,9 @@ const JobDetail = ({ route, navigation }) => {
 
                     <Divider style={{ marginVertical: 15 }} />
 
-                    <Section title="Mô tả công việc" content={job.description} />
-                    <Section title="Lợi ích" content={job.benefits} />
-                    <Section title="Yêu cầu" content={job.requirements} />
+                    <Section title="Mô tả công việc" content={<RenderHTML contentWidth={width} source={{ 'html': job.description }} />} />
+                    <Section title="Lợi ích" content={<RenderHTML contentWidth={width} source={{ 'html': job.benefits }} />} />
+                    <Section title="Yêu cầu" content={<RenderHTML contentWidth={width} source={{ 'html': job.requirements }} />} />
 
                     <Section title="Thông tin chung">
                         <InfoRow label="Địa điểm:" value={getLocationString()} />

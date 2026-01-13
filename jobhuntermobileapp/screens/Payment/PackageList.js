@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Alert, StyleSheet } from 'react-native';
+import { View, ScrollView, Alert, StyleSheet, useWindowDimensions } from 'react-native';
 import { Text, Card, Button, ActivityIndicator, Chip } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authApis, endpoints } from '../../utils/Apis';
@@ -8,6 +8,9 @@ import RenderHTML from "react-native-render-html";
 const PackageList = ({ navigation }) => {
     const [packages, setPackages] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    const { width } = useWindowDimensions();
+    
 
     useEffect(() => {
         const loadPackages = async () => {
@@ -50,7 +53,7 @@ const PackageList = ({ navigation }) => {
                             </Chip>
                         </View>
                         <View style={styles.desc}>
-                            <RenderHTML source={{ html: pkg.description }} />
+                            <RenderHTML contentWidth={width} source={{ 'html': pkg.description }} />
                         </View>
 
                         <Button

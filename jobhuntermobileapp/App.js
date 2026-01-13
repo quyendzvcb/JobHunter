@@ -33,7 +33,7 @@ const Tab = createBottomTabNavigator();
 const JobSearchStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="ApplicantHome" component={ApplicantHome} options={{ headerShown: false }} />
-    <Stack.Screen name="JobDetail" component={JobDetail} options={{ headerShown: false }} />
+    <Stack.Screen name="JobDetail" component={JobDetail} options={{ title: "Chi tiết công việc" }} />
     <Stack.Screen name="ApplyJob" component={ApplyJob} options={{ title: "Ứng tuyển" }} />
     <Stack.Screen name="CompareJobs" component={CompareJobs} options={{ headerShown: false }} />
   </Stack.Navigator>
