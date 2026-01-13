@@ -12,16 +12,12 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q, Count, Sum, Avg, F
 
-
-
 class RecruiterJobViewSet(viewsets.ModelViewSet):
     permission_classes = [perms.IsVerifiedRecruiter]
     pagination_class = paginators.JobPagination
 
     def get_serializer_class(self):
-        if self.action in ['create', 'update', 'partial_update', 'retrieve']:
-            return serializers.JobDetailsSerializer
-        return serializers.JobSerializer
+        return serializers.JobDetailsSerializer
 
     def get_queryset(self):
         user = self.request.user
@@ -55,11 +51,16 @@ class RecruiterJobViewSet(viewsets.ModelViewSet):
         else:
             trunc_func = TruncMonth('created_at')
 
-        stats = jobs.annotate(
+        views_stats = jobs.annotate(
             period_date=trunc_func
         ).values('period_date').annotate(
-            total_applies=Count('applications', distinct=True),
-            total_views=Sum('views'),
+            total_views=Sum('views')
+        ).order_by('period_date')
+
+        apps_stats = jobs.annotate(
+            period_date=trunc_func
+        ).values('period_date').annotate(
+            total_applies=Count('applications'),
             avg_rating=Avg('applications__recruiter_rating')
         ).order_by('period_date')
 

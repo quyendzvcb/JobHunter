@@ -8,7 +8,6 @@ import Apis, { endpoints } from '../../utils/Apis';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RenderHTML from "react-native-render-html";
 
-
 const JobDetail = ({ route, navigation }) => {
     const { job_id } = route.params;
     const [job, setJob] = useState([])

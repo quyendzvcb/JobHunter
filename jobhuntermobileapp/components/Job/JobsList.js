@@ -21,18 +21,44 @@ const JobsList = ({
     const [page, setPage] = useState(1);
     const [refreshing, setRefreshing] = useState(false);
     const [searchText, setSearchText] = useState('');
-    const isFocused = useIsFocused();
 
+    // Chặn gọi API 2 lần khi mới vào
+    const isFocused = useIsFocused();
+    const firstRender = useRef(true);
+
+    // Effect 1: Focus lại màn hình
     useEffect(() => {
         if (isFocused) {
-            loadJobs();
+            if (firstRender.current) {
+                firstRender.current = false;
+                return;
+            }
+            loadJobs(1);
         }
     }, [isFocused]);
 
+    // Effect 2: Thay đổi bộ lọc
+    useEffect(() => {
+        if (!isRecruiter) {
+            setPage(1);
+            loadJobs(1);
+        }
+    }, [isRecruiter ? null : JSON.stringify(filters)]);
 
-    // Hàm gọi API
+    // Effect 3: Tìm kiếm
+    useEffect(() => {
+        let timer = setTimeout(() => {
+            if (page > 0) {
+                setPage(1);
+                loadJobs(1);
+            }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchText]);
+
+    // --- HÀM GỌI API ---
     const loadJobs = async (pageNum = 1) => {
-        if (pageNum === 0) return; // Đã hết dữ liệu
+        if (pageNum === 0) return;
 
         try {
             setLoading(true);
@@ -50,6 +76,8 @@ const JobsList = ({
                 if (!isRecruiter) {
                     if (filters.category_id) url += `&category_id=${filters.category_id}`;
                     if (filters.salary_min) url += `&salary_min=${filters.salary_min}`;
+
+                    // Gửi mảng location_id lên Backend (Backend dùng params.getlist để nhận)
                     if (filters.location_id && Array.isArray(filters.location_id)) {
                         filters.location_id.forEach(id => {
                             url += `&location_id=${id}`;
@@ -61,14 +89,13 @@ const JobsList = ({
             console.log("Calling API:", url);
             const res = await api.get(url);
 
-            // Xử lý dữ liệu trả về
+            // --- CẬP NHẬT STATE (Không cần lọc trùng nữa vì Backend đã lo) ---
             if (pageNum === 1) {
-                setJobs(filterUnique(res.data.results)); // Trang 1: Gán mới hoàn toàn
+                setJobs(res.data.results);
             } else {
-                setJobs(prev => filterUnique([...prev, ...res.data.results])); // Trang > 1: Nối thêm
+                setJobs(prev => [...prev, ...res.data.results]);
             }
 
-            // Kiểm tra next page từ API (Django REST Framework trả về null nếu hết trang)
             if (res.data.next === null) {
                 setPage(0);
             } else {
@@ -77,7 +104,6 @@ const JobsList = ({
 
         } catch (ex) {
             if (ex.response && ex.response.status === 404) {
-                console.log("Đã hết trang (404).");
                 setPage(0);
             } else {
                 console.error("Load Jobs Error:", ex);
@@ -88,27 +114,6 @@ const JobsList = ({
         }
     };
 
-    // 1. Effect khi thay đổi Search Text (Debounce)
-    useEffect(() => {
-        let timer = setTimeout(() => {
-            if (page > 0)
-                setPage(1);
-            loadJobs(1);
-        }, 500);
-
-        return () => clearTimeout(timer);
-    }, [searchText]);
-
-    // 2. Effect khi thay đổi Filters (Reset về trang 1)
-    // JSON.stringify(filters) giúp so sánh nội dung object thay vì tham chiếu
-    useEffect(() => {
-        if (!isRecruiter) {
-            setPage(1);
-            loadJobs(1);
-        }
-    }, [isRecruiter ? null : JSON.stringify(filters)]);
-
-    // 3. Xử lý Refresh (Kéo xuống làm mới)
     const onRefresh = async () => {
         setRefreshing(true);
         if (onRefreshExternal) {
@@ -118,7 +123,6 @@ const JobsList = ({
         await loadJobs(1);
     };
 
-    // 4. Xử lý Load More (Kéo xuống đáy)
     const loadMore = () => {
         if (!loading && page > 0) {
             const nextPage = page + 1;
@@ -126,9 +130,9 @@ const JobsList = ({
         }
     };
 
+
     return (
         <View style={styles.container}>
-            {/* Header Tìm kiếm */}
             <View style={styles.header}>
                 <Searchbar
                     placeholder={isRecruiter ? "Tìm trong tin của bạn..." : "Tìm việc, công ty..."}
@@ -154,7 +158,6 @@ const JobsList = ({
                 )}
             </View>
 
-            {/* Danh sách Job */}
             <FlatList
                 data={jobs}
                 keyExtractor={(item) => item.id.toString()}
@@ -167,24 +170,15 @@ const JobsList = ({
                         onEditPress={(job) => navigation.navigate("JobEditor", { jobId: job.id })}
                     />
                 )}
-                // Xử lý phân trang
                 onEndReached={loadMore}
                 onEndReachedThreshold={0.5}
-
-                // Xử lý refresh
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-
-                // Loading footer
                 ListFooterComponent={loading && page > 1 ? <ActivityIndicator size="small" color="#1976D2" style={{ margin: 20 }} /> : null}
-
-                // Empty state
                 ListEmptyComponent={!loading && <Text style={styles.emptyText}>Không tìm thấy tin nào.</Text>}
-
                 contentContainerStyle={{ paddingBottom: 80 }}
             />
 
-            {/* Loading full màn hình khi load trang 1 */}
             {loading && page === 1 && !refreshing && (
                 <View style={styles.loadingOverlay}>
                     <ActivityIndicator size="large" color="#1976D2" />

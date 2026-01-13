@@ -13,7 +13,8 @@ const JobEditor = ({ route, navigation }) => {
     useEffect(() => {
         const loadJob = async () => {
             try {
-                const res = await Apis.get(endpoints['job-detail'](jobId));
+                const token = await AsyncStorage.getItem('token');
+                const res = await authApis(token).get(endpoints['recruiter-job-detail'](jobId));
                 setJob(res.data)
                 console.log(res.data);
             } catch (ex) {
