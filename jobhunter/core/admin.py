@@ -3,10 +3,9 @@ from django.db.models import Sum, Count
 from django.template.response import TemplateResponse
 from django.urls import path
 from core.models import Job, Application, Transaction, Location, Category, ServicePackage
-from users.models import Recruiter, User
+from users.models import Recruiter, User, Applicant
 from django.db.models.functions import TruncMonth
-
-
+from django.utils import timezone
 
 class BaseAuditAdmin(admin.ModelAdmin):
     readonly_fields = ['created_at', 'updated_at']
@@ -67,31 +66,78 @@ class JobHunterAdminSite(admin.AdminSite):
     index_title = 'Dashboard Thống kê & Quản lý'
 
     def get_urls(self):
-        return [path('stats-view/', self.stats_view)] + super().get_urls()
+        return [path('stats-view/', self.admin_view(self.stats_view), name='stats_view')] + super().get_urls()
 
     def stats_view(self, request):
+        current_year = timezone.now().year
+        try:
+            selected_year = int(request.GET.get('year', current_year))
+        except ValueError:
+            selected_year = current_year
+
         total_recruiters = Recruiter.objects.count()
-        pending_recruiters = Recruiter.objects.filter(is_verified=False).count()
-        total_jobs = Job.objects.count()
-        total_apps = Application.objects.count()
+        total_applicants = Applicant.objects.count()
+        total_jobs = Job.objects.filter(created_at__year=selected_year).count()
 
-        revenue_data = Transaction.objects.filter(status='SUCCESS').aggregate(total=Sum('amount'))
-        total_revenue = revenue_data['total'] or 0
+        revenue_query = Transaction.objects.filter(status='SUCCESS', created_at__year=selected_year)
+        total_revenue = revenue_query.aggregate(total=Sum('amount'))['total'] or 0
+        revenue_formatted = "{:,.0f}".format(total_revenue)
 
-        apps_by_month = Application.objects.annotate(month=TruncMonth('created_at')).values('month').annotate(count=Count('id')).order_by('month')
+        apps_data = self.get_monthly_data(
+            Application.objects.filter(created_at__year=selected_year),
+            count_field='id',
+            is_sum=False
+        )
+
+        jobs_data = self.get_monthly_data(
+            Job.objects.filter(created_at__year=selected_year),
+            count_field='id',
+            is_sum=False
+        )
+
+        revenue_data = self.get_monthly_data(
+            revenue_query,
+            count_field='amount',
+            is_sum=True
+        )
+
+        chart_labels = [f"Tháng {i}" for i in range(1, 13)]
 
         context = {
+            **self.each_context(request),
             'kpi': {
                 'recruiters': total_recruiters,
-                'pending': pending_recruiters,
+                'applicants': total_applicants,
                 'jobs': total_jobs,
-                'revenue': total_revenue,
-                'apps': total_apps,
+                'revenue': revenue_formatted,
             },
-            'apps_by_month': apps_by_month
+            'selected_year': selected_year,
+            'year_options': range(current_year, current_year - 5, -1),
+            'chart_labels': chart_labels,
+
+            # Truyền 3 bộ dữ liệu sang Template
+            'chart_data_apps': apps_data,
+            'chart_data_jobs': jobs_data,
+            'chart_data_revenue': revenue_data,
         }
 
         return TemplateResponse(request, 'admin/stats.html', context)
+
+    def get_monthly_data(self, queryset, count_field='id', is_sum=False):
+        if is_sum:
+            data = queryset.annotate(month=TruncMonth('created_at')).values('month').annotate(val=Sum(count_field)).order_by('month')
+        else:
+            data = queryset.annotate(month=TruncMonth('created_at')).values('month').annotate(val=Count(count_field)).order_by('month')
+
+        result = []
+        for i in range(1, 13):
+            val = 0
+            for item in data:
+                if item['month'].month == i:
+                    val = float(item['val'] or 0)
+                    break
+            result.append(val)
+        return result
 
 admin_site = JobHunterAdminSite(name='jobhunter_admin')
 
