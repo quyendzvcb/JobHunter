@@ -27,7 +27,8 @@ const RecruiterHome = () => {
     const loadStats = useCallback(async () => {
         try {
             const token = await AsyncStorage.getItem('token');
-            const res = await authApis(token).get(`${endpoints['recruiter-jobs']}stats/?period=${period}&year=${year}`);
+            const res = await authApis(token).get(`${endpoints['recruiter-stats']}?period=${period}&year=${year}`);
+            console.log(res);
             const data = res.data.chart_data || [];
             setStatsData(data);
 

@@ -1,22 +1,24 @@
 import os
 from pathlib import Path
 import pymysql
-from dotenv import load_dotenv
 
-load_dotenv()
-
+# 1. Cấu hình Proxy (Bắt buộc cho PythonAnywhere Free)
 os.environ['http_proxy'] = "http://proxy.server:3128"
 os.environ['https_proxy'] = "http://proxy.server:3128"
 
+# 2. Database Driver
 pymysql.version_info = (1, 4, 3, "final", 0)
 pymysql.install_as_MySQLdb()
 
+# Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Quick-start development settings
 SECRET_KEY = 'django-insecure-%1cnm53y!vq)6)82v&a6%4)x)$2rt+udrle927*bz6+r(q4q8!'
 DEBUG = True
 ALLOWED_HOSTS = ['quyendz.pythonanywhere.com', '127.0.0.1', 'localhost']
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -64,20 +66,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'jobhunter.wsgi.application'
 
+# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'NAME': 'quyendz$johunterdb',
+        'USER': 'quyendz',
+        'PASSWORD': 'quyen03032005',
+        'HOST': 'quyendz.mysql.pythonanywhere-services.com',
+        'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
 
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -85,41 +89,46 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'users/static/')
 
+# Upload Settings
 CKEDITOR_UPLOAD_PATH = "ckeditor/images/"
 
+# Cloudinary
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
 cloudinary.config(
-    cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME'),
-    api_key = os.getenv('CLOUDINARY_API_KEY'),
-    api_secret = os.getenv('CLOUDINARY_API_SECRET'),
-    secure = True,
-    api_proxy = "http://proxy.server:3128" 
+    cloud_name="dqbheiddg",
+    api_key="434142617659482",
+    api_secret="PIm-pf4A7oFGj0WO4Eu8oCuDtW8",
+    secure=True,
+    api_proxy="http://proxy.server:3128"
 )
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+    'CLOUD_NAME': 'dqbheiddg',
+    'API_KEY': '434142617659482',
+    'API_SECRET': 'PIm-pf4A7oFGj0WO4Eu8oCuDtW8',
     'API_PROXY': 'http://proxy.server:3128',
     'SECURE': True,
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
+# Auth & API
 AUTH_USER_MODEL = "users.User"
 INTERNAL_IPS = ["127.0.0.1"]
 
@@ -138,9 +147,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MOMO_CONFIG = {
     'endpoint': 'https://test-payment.momo.vn/v2/gateway/api/create',
-    'partner_code': os.getenv('MOMO_PARTNER_CODE'),
-    'access_key': os.getenv('MOMO_ACCESS_KEY'),
-    'secret_key': os.getenv('MOMO_SECRET_KEY'),
-    'redirect_url': os.getenv('MOMO_REDIRECT_URL'),
-    'ipn_url': os.getenv('MOMO_IPN_URL')
+    'partner_code': 'MOMO',
+    'access_key': 'F8BBA842ECF85',
+    'secret_key': 'K951B6PE1waDMi640xX08PD3vg6EkVlz',
+    'redirect_url': 'http://localhost:3000/payment-result',
+    'ipn_url': 'https://quyendz.pythonanywhere.com/payment/momo-ipn/'
 }

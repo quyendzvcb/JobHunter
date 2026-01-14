@@ -4,7 +4,6 @@ import { Text, Button, Avatar, RadioButton, TextInput, Divider, Card } from 'rea
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authApis, endpoints } from '../../utils/Apis';
-import styles from './Styles';
 
 const ApplicationDetail = ({ route, navigation }) => {
     const { application } = route.params;
@@ -28,7 +27,7 @@ const ApplicationDetail = ({ route, navigation }) => {
             const token = await AsyncStorage.getItem('token');
             const payload = {
                 status: status,
-                recruiter_rating: rating ? numRating : 0 
+                recruiter_rating: rating ? numRating : 0
             };
 
             await authApis(token).patch(endpoints['evaluate-application'](application.id), payload);
@@ -130,5 +129,17 @@ const ApplicationDetail = ({ route, navigation }) => {
         </ScrollView>
     );
 };
+
+const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: '#F5F7FA' },
+    header: { padding: 20, backgroundColor: 'white' },
+    name: { fontSize: 20, fontWeight: 'bold', color: '#333', marginBottom: 10 },
+    contactBar: { flexDirection: 'row', marginTop: 10, marginLeft: -10 },
+    section: { padding: 20, backgroundColor: 'white', marginTop: 10 },
+    sectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 10, color: '#444' },
+    content: { lineHeight: 22, color: '#333', backgroundColor: '#f9f9f9', padding: 10, borderRadius: 8 },
+    evaluationCard: { margin: 15, backgroundColor: 'white', elevation: 3 },
+    radioRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 5 },
+});
 
 export default ApplicationDetail;
