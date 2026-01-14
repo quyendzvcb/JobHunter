@@ -64,8 +64,34 @@ class RecruiterJobViewSet(viewsets.ModelViewSet):
             avg_rating=Avg('applications__recruiter_rating')
         ).order_by('period_date')
 
+        stats_dict = {}
+
+        for item in views_stats:
+            d_key = item['period_date']
+            stats_dict[d_key] = {
+                "period_date": d_key,
+                "total_views": item['total_views'],
+                "total_applies": 0,
+                "avg_rating": 0.0
+            }
+
+        for item in apps_stats:
+            d_key = item['period_date']
+            if d_key not in stats_dict:
+                stats_dict[d_key] = {
+                    "period_date": d_key,
+                    "total_views": 0,
+                    "total_applies": 0,
+                    "avg_rating": 0.0
+                }
+
+            stats_dict[d_key]["total_applies"] = item['total_applies']
+            stats_dict[d_key]["avg_rating"] = item['avg_rating']
+
+        final_stats = sorted(stats_dict.values(), key=lambda x: x['period_date'])
+
         return Response({
-            "chart_data": list(stats)
+            "chart_data": final_stats
         })
 
 
