@@ -5,75 +5,85 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Provider as PaperProvider } from 'react-native-paper';
 
-// --- Context & Reducer ---
 import { MyUserContext } from "./utils/contexts/MyUserContext";
 import MyUserReducer from "./utils/reducers/MyUserReducer";
 
-// --- Screens ---
 import Welcome from "./screens/Welcome/Welcome";
 import Login from "./screens/User/Login";
 import Register from "./screens/User/Register";
+
 import ApplicantHome from "./screens/Applicant/ApplicantHome";
 import JobDetail from "./screens/Applicant/JobDetail";
-import Profile from "./screens/User/Profile";
 import ApplyJob from "./screens/Applicant/ApplyJob";
-import MyApplications from "./screens/User/MyApplications";
+import CompareJobs from "./screens/Applicant/CompareJobs";
+
 import RecruiterHome from "./screens/Recruiter/RecruiterHome";
 import JobEditor from "./screens/Recruiter/JobEditor";
 import AddJob from "./screens/Recruiter/AddJob";
-import ApplicationDetail from "./screens/Recruiter/ApplicationDetail"
-import PackageList from "./screens/Payment/PackageList"
-import PaymentHistory from "./screens/Payment/PaymentHistory"
+
+import MyApplications from "./screens/User/MyApplications";
+import ApplicationDetail from "./screens/Recruiter/ApplicationDetail";
+import Profile from "./screens/User/Profile";
+import PackageList from "./screens/Payment/PackageList";
+import PaymentHistory from "./screens/Payment/PaymentHistory";
 import CreatePayment from './screens/Payment/CreatePayment';
-import CompareJobs from "./screens/Applicant/CompareJobs";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-const JobSearchStack = () => (
-  <Stack.Navigator>
-    <Stack.Screen name="ApplicantHome" component={ApplicantHome} options={{ headerShown: false }} />
-    <Stack.Screen name="JobDetail" component={JobDetail} options={{ title: "Chi tiết công việc" }} />
-    <Stack.Screen name="ApplyJob" component={ApplyJob} options={{ title: "Ứng tuyển" }} />
-    <Stack.Screen name="CompareJobs" component={CompareJobs} options={{ headerShown: false }} />
-  </Stack.Navigator>
-);
+const ApplicantStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="ApplicantHome" component={ApplicantHome} options={{ headerShown: false }} />
+      <Stack.Screen name="JobDetail" component={JobDetail} options={{ title: "Chi tiết công việc" }} />
+      <Stack.Screen name="ApplyJob" component={ApplyJob} options={{ title: "Ứng tuyển" }} />
+      <Stack.Screen name="CompareJobs" component={CompareJobs} options={{ headerShown: false }} />
+    </Stack.Navigator>
+  );
+};
 
-const RecruiterDashboardStack = () => (
-  <Stack.Navigator>
-    <Stack.Screen name="RecruiterHome" component={RecruiterHome} options={{ headerShown: false }} />
-    <Stack.Screen name="JobEditor" component={JobEditor} option={{ headerShown: false }} />
-    <Stack.Screen name="AddJob" component={AddJob} option={{ headerShown: false }} />
-    <Stack.Screen name="PackageList" component={PackageList} options={{ title: 'Chọn gói dịch vụ' }} />
-    <Stack.Screen name="CreatePayment" component={CreatePayment} options={{ title: "Thanh toán" }} />
-    <Stack.Screen name="PaymentHistory" component={PaymentHistory} options={{ title: 'Lịch sử giao dịch' }} />
-  </Stack.Navigator>
-);
+const RecruiterStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="RecruiterHome" component={RecruiterHome} options={{ headerShown: false }} />
+      <Stack.Screen name="JobEditor" component={JobEditor} options={{ headerShown: false }} />
+      <Stack.Screen name="AddJob" component={AddJob} options={{ headerShown: false }} />
+      <Stack.Screen name="PackageList" component={PackageList} options={{ title: 'Chọn gói dịch vụ' }} />
+      <Stack.Screen name="CreatePayment" component={CreatePayment} options={{ title: "Thanh toán" }} />
+      <Stack.Screen name="PaymentHistory" component={PaymentHistory} options={{ title: 'Lịch sử giao dịch' }} />
+    </Stack.Navigator>
+  );
+};
 
-const ActivityStack = () => (
-  <Stack.Navigator>
-    <Stack.Screen name="ApplicationList" component={MyApplications} options={{ headerShown: false }} />
-    <Stack.Screen name="ApplicationDetail" component={ApplicationDetail} options={{ title: "Chi tiết công việc" }} />
-  </Stack.Navigator>
-);
+const ActivityStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="ApplicationList" component={MyApplications} options={{ headerShown: false }} />
+      <Stack.Screen name="ApplicationDetail" component={ApplicationDetail} options={{ title: "Chi tiết hồ sơ" }} />
+    </Stack.Navigator>
+  );
+};
 
-const ProfileStack = () => (
-  <Stack.Navigator>
-    <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
-    <Stack.Screen name="PackageList" component={PackageList} options={{ title: 'Chọn gói dịch vụ' }} />
-    <Stack.Screen name="PaymentHistory" component={PaymentHistory} options={{ title: 'Lịch sử giao dịch' }} />
-    <Stack.Screen name="CreatePayment" component={CreatePayment} options={{ title: "Thanh toán" }} />
-  </Stack.Navigator>
-);
+const ProfileStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
+      <Stack.Screen name="PackageList" component={PackageList} options={{ title: 'Chọn gói dịch vụ' }} />
+      <Stack.Screen name="PaymentHistory" component={PaymentHistory} options={{ title: 'Lịch sử giao dịch' }} />
+      <Stack.Screen name="CreatePayment" component={CreatePayment} options={{ title: "Thanh toán" }} />
+    </Stack.Navigator>
+  );
+};
 
 const MainTabNavigator = () => {
   const [user] = useContext(MyUserContext);
   const isRecruiter = user?.role === "RECRUITER";
+
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false }}>
+    <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveTintColor: '#1976D2' }}>
       <Tab.Screen
         name="HomeTab"
-        component={isRecruiter ? RecruiterDashboardStack : JobSearchStack}
+        component={isRecruiter ? RecruiterStack : ApplicantStack}
         options={{
           title: isRecruiter ? "Quản lý" : "Tìm việc",
           tabBarIcon: ({ color }) => (

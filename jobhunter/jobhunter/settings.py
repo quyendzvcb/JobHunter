@@ -111,17 +111,17 @@ import cloudinary.uploader
 import cloudinary.api
 
 cloudinary.config(
-    cloud_name="dqbheiddg",
-    api_key="434142617659482",
-    api_secret="PIm-pf4A7oFGj0WO4Eu8oCuDtW8",
+    cloud_name= process.env.EXPO_PUBLIC_CLOUD_NAME,
+    api_key= process.env.EXPO_PUBLIC_API_KEY,
+    api_secret= process.env.EXPO_PUBLIC_API_SECRET,
     secure=True,
     api_proxy="http://proxy.server:3128"
 )
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dqbheiddg',
-    'API_KEY': '434142617659482',
-    'API_SECRET': 'PIm-pf4A7oFGj0WO4Eu8oCuDtW8',
+    'CLOUD_NAME': process.env.EXPO_PUBLIC_CLOUD_NAME,
+    'API_KEY': process.env.EXPO_PUBLIC_API_KEY,
+    'API_SECRET': process.env.EXPO_PUBLIC_API_SECRET,
     'API_PROXY': 'http://proxy.server:3128',
     'SECURE': True,
 }
@@ -147,9 +147,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MOMO_CONFIG = {
     'endpoint': 'https://test-payment.momo.vn/v2/gateway/api/create',
-    'partner_code': 'MOMO',
-    'access_key': 'F8BBA842ECF85',
-    'secret_key': 'K951B6PE1waDMi640xX08PD3vg6EkVlz',
-    'redirect_url': 'http://localhost:3000/payment-result',
-    'ipn_url': 'https://quyendz.pythonanywhere.com/payment/momo-ipn/'
+    'partner_code': process.env.EXPO_PUBLIC_PARTNER_CODE,
+    'access_key': process.env.EXPO_PUBLIC_ACCESS_KEY,
+    'secret_key': process.env.EXPO_PUBLIC_SECRET_KEY,
+    'redirect_url': process.env.EXPO_PUBLIC_REDIRECT_UR,
+    'ipn_url': process.env.EXPO_PUBLIC_IPN_URL
 }

@@ -123,7 +123,7 @@ const CompareJobs = ({ navigation, route }) => {
             </View>
 
             <View style={[styles.cell, { height: HEIGHTS.COMMON, backgroundColor: getRowColor(2) }]}>
-                <Text style={styles.text}>{job.years_of_experience} năm</Text>
+                <Text style={styles.text}>{job.years_of_experience !== null ? `${job.years_of_experience} năm` : "Không yêu cầu"}</Text>
             </View>
 
             <View style={[styles.cell, { height: HEIGHTS.COMMON, backgroundColor: getRowColor(3) }]}>
