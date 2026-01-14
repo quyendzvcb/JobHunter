@@ -96,7 +96,7 @@ const Register = () => {
                     nav.replace("Login");
                 }
             } catch (ex) {
-                console.error(ex);
+                console.log(ex);
                 if (ex.response && ex.response.data) {
                     const serverErrors = ex.response.data;
                     let formattedErrors = {};

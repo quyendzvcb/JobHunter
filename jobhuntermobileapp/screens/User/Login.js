@@ -30,9 +30,19 @@ const Login = () => {
                 'client_secret': process.env.EXPO_PUBLIC_CLIENT_SECRET
             }, { headers: { "Content-Type": "application/x-www-form-urlencoded" } });
 
-            await AsyncStorage.setItem("token", res.data.access_token);
-            const userRes = await authApis(res.data.access_token).get(endpoints['current-user']);
-            dispatch({ "type": "login", "payload": userRes.data });
+            const accessToken = res.data.access_token;
+            const userRes = await authApis(accessToken).get(endpoints['current-user']);
+            const resData = userRes.data
+            console.log(resData)
+            if (resData.role === 'RECRUITER') {
+                if (resData.recruiter && !resData.recruiter.is_verified) {
+                    Alert.alert("Thông báo", "Tài khoản nhà tuyển dụng của bạn đang chờ phê duyệt. Vui lòng quay lại sau.");
+                    setLoading(false);
+                    return;
+                }
+            }
+            await AsyncStorage.setItem("token", accessToken);
+            dispatch({ "type": "login", "payload": resData });
         } catch (ex) {
             Alert.alert("Lỗi", "Tên đăng nhập hoặc mật khẩu không chính xác!");
         } finally {

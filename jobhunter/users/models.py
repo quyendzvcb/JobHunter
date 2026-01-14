@@ -10,8 +10,10 @@ class User(AbstractUser):
         RECRUITER = "RECRUITER", "Nhà tuyển dụng"
         APPLICANT = "APPLICANT", "Ứng viên"
 
+    first_name = models.CharField(_("first name"), max_length=150, blank=False, null=False)
+    last_name = models.CharField(_("last name"), max_length=150, blank=False,  null=False)
     email = models.EmailField("email address", unique=True, null=False, blank=False)
-    avatar = CloudinaryField(folder="avatars/", null=True, blank=True)
+    avatar = models.CharField(max_length=255, null=True, blank=True)
     role = models.CharField(choices=Role.choices, default=Role.APPLICANT, max_length=20)
 
     def __str__(self):
@@ -21,7 +23,7 @@ class User(AbstractUser):
 class Recruiter(models.Model):
     company_name = models.CharField(max_length=100, unique=True)
     company_location = models.CharField(max_length=100)
-    logo = CloudinaryField(folder="logos/", null=True, blank=True)
+    logo = models.CharField(max_length=255, null=True, blank=True)
     webURL = models.URLField()
     is_verified = models.BooleanField(default=False)
 

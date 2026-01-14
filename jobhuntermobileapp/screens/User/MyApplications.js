@@ -87,7 +87,7 @@ const MyApplications = () => {
                     )}
                     <Card.Content>
                         <View style={styles.row}>
-                            <View style={{ marginLeft: 12, flex: 1 }}>
+                            <View style={{ marginLeft: 12, flex: 1, marginTop: 20 }}>
                                 <Text style={styles.boldText}>{applicantName}</Text>
 
                                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
@@ -122,7 +122,6 @@ const MyApplications = () => {
         <Card style={styles.card}>
             <Card.Content>
                 <View style={styles.row}>
-                    <Avatar.Image size={50} source={{ uri: item.job_detail?.recruiter?.logo || 'https://via.placeholder.com/150' }} style={{ backgroundColor: 'white' }} />
                     <View style={{ marginLeft: 12, flex: 1 }}>
                         <Text style={styles.boldText}>{item.job_detail?.title}</Text>
                         <Text style={{ fontSize: 13, color: '#555' }}>{item.job_detail?.company_name}</Text>
