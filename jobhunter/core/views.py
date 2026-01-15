@@ -252,7 +252,6 @@ class PaymentViewSet(viewsets.ViewSet):
     @action(methods=['post'], detail=False, url_path='momo-pay')
     def create_momo_payment(self, request):
         try:
-            # 1. Lấy thông tin từ Client (mua gói dịch vụ nào)
             service_package_id = request.data.get('service_package_id')
             job_id = request.data.get('job_id')
             job_instance = None
@@ -268,10 +267,8 @@ class PaymentViewSet(viewsets.ViewSet):
             requestId = str(uuid.uuid4())
             orderInfo = f"Thanh toan goi {service_package.name}"
 
-            # Lấy config
             MOMO_CONFIG = settings.MOMO_CONFIG
 
-            # 3. Tạo chữ ký HMAC SHA256
             raw_signature = (
                 f"accessKey={MOMO_CONFIG['access_key']}"
                 f"&amount={amount}"
