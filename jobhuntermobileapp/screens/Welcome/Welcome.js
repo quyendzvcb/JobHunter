@@ -29,7 +29,7 @@ const Welcome = ({ navigation }) => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[styles.btnSecondary, { backgroundColor: '#E3F2FD' }]} 
+                    style={[styles.btnSecondary, { backgroundColor: '#E3F2FD' }]}
                     onPress={() => navigation.navigate('Login')}
                 >
                     <Text style={[styles.btnSecondaryText, { color: '#1976D2' }]}>Đăng nhập</Text>

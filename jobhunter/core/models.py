@@ -94,7 +94,7 @@ class Transaction(BaseModel):
         SUCCESS = "SUCCESS", "Thành công"
         FAILED = "FAILED", "Thất bại"
 
-    amount = models.DecimalField(max_digits=12, decimal_places=0, null=True)# Logic amount not null
+    amount = models.DecimalField(max_digits=12, decimal_places=0, null=True)
     payment_method = models.CharField(choices=PaymentMethod.choices, max_length=20)
     transaction_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     status = models.CharField(choices=Status.choices, default=Status.PENDING, max_length=20)

@@ -341,7 +341,6 @@ class PaymentViewSet(viewsets.ViewSet):
         resultCode = str(data.get('resultCode'))
         orderId = data.get('orderId')
 
-
         check = (resultCode == '0')
 
         if check:

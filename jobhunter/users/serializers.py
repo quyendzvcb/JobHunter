@@ -25,8 +25,18 @@ class ApplicantSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     role = serializers.CharField(read_only=True)
-    recruiter = RecruiterSerializer(read_only=True)
-    applicant = ApplicantSerializer(read_only=True)
+    recruiter = serializers.SerializerMethodField()
+    applicant = serializers.SerializerMethodField()
+
+    def get_recruiter(self, obj):
+        if hasattr(obj, 'recruiter') and obj.recruiter:
+            return RecruiterSerializer(obj.recruiter).data
+        return None
+
+    def get_applicant(self, obj):
+        if hasattr(obj, 'applicant') and obj.applicant:
+            return ApplicantSerializer(obj.applicant).data
+        return None
 
     def create(self, validated_data):
         data = validated_data.copy()
@@ -34,12 +44,6 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(data['password'])
         user.save()
         return user
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if instance.avatar:
-            data['avatar'] = instance.avatar.url if instance.avatar else ''
-        return data
 
     class Meta:
         model = User

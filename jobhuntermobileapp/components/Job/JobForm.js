@@ -44,7 +44,7 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
                 salary_max: initialValues.salary_max?.toString() || '',
                 location_ids: initialValues.location_details
                     ? initialValues.location_details.map(l => l.id)
-                    : (initialValues.location || []), // Map từ 'location' của backend nếu có
+                    : (initialValues.location || []),
                 category_id: initialValues.category_detail?.id || initialValues.category,
                 deadline: initialValues.deadline || '',
                 description: initialValues.description || '',

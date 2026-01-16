@@ -115,7 +115,6 @@ class JobHunterAdminSite(admin.AdminSite):
             'year_options': range(current_year, current_year - 5, -1),
             'chart_labels': chart_labels,
 
-            # Truyền 3 bộ dữ liệu sang Template
             'chart_data_apps': apps_data,
             'chart_data_jobs': jobs_data,
             'chart_data_revenue': revenue_data,

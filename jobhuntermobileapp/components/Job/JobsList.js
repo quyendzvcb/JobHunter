@@ -71,7 +71,6 @@ const JobsList = ({
                 if (!isRecruiter) {
                     if (filters.category_id) url += `&category_id=${filters.category_id}`;
                     if (filters.salary_min) url += `&salary_min=${filters.salary_min}`;
-
                     if (filters.location_id && Array.isArray(filters.location_id)) {
                         filters.location_id.forEach(id => {
                             url += `&location_id=${id}`;
@@ -122,7 +121,6 @@ const JobsList = ({
             loadJobs(nextPage);
         }
     };
-
 
     return (
         <View style={styles.container}>
