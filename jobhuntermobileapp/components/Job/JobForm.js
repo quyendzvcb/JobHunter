@@ -101,7 +101,7 @@ const JobForm = ({ initialValues, onSubmit, loading, buttonLabel }) => {
     }
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }}
+        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60, marginTop: 30 }}
             keyboardShouldPersistTaps="handled">
             <Text style={styles.headerTitle}>
                 {initialValues ? "CẬP NHẬT TIN TUYỂN DỤNG" : "ĐĂNG TIN TUYỂN DỤNG MỚI"}
